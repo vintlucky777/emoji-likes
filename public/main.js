@@ -174,18 +174,18 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
   DOMnode.onmouseup = function (ev) {
     return onPressEnd(ev, ev.offsetX, ev.offsetY);
   };
-  DOMnode.ontouchstart = function (ev) {
+  // DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
+  // DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetY);
+  // DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
+  DOMnode.onpointerdown = function (ev) {
     return onPressStart(ev, ev.offsetX, ev.offsetY);
   };
-  DOMnode.ontouchmove = function (ev) {
-    return onPressDrag(ev, ev.offsetX, ev.offsetY);
+  DOMnode.onpointermove = function (ev) {
+    return onPressDrag(ev, ev.offsetX, ev.offsetX);
   };
-  DOMnode.ontouchend = function (ev) {
+  DOMnode.onpointerup = function (ev) {
     return onPressEnd(ev, ev.offsetX, ev.offsetY);
   };
-  // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
-  // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
 bindInputs(app, { onClick: onClick, onDrag: onDrag });
