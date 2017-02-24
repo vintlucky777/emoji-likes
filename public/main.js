@@ -94,11 +94,13 @@ var bindInputs = function bindInputs(DOMnode, _ref) {
   var pressStart = null;
   var isDrag = false;
 
-  var onPressStart = function onPressStart(cx, cy) {
+  var onPressStart = function onPressStart(ev, cx, cy) {
+    ev.preventDefault();
     isPressed = true;
     pressStart = Date.now();
   };
-  var onPressEnd = function onPressEnd(cx, cy) {
+  var onPressEnd = function onPressEnd(ev, cx, cy) {
+    ev.preventDefault();
     if (!isDrag && Date.now() - pressStart < 400) {
       onClick(cx, cy);
     }
@@ -108,7 +110,8 @@ var bindInputs = function bindInputs(DOMnode, _ref) {
     isDrag = false;
   };
 
-  var onPressDrag = function onPressDrag(dx, dy) {
+  var onPressDrag = function onPressDrag(ev, dx, dy) {
+    ev.preventDefault();
     if (!isPressed) {
       return;
     }
@@ -118,22 +121,22 @@ var bindInputs = function bindInputs(DOMnode, _ref) {
   };
 
   DOMnode.onmousedown = function (ev) {
-    return onPressStart(ev.offsetX, ev.offsetY);
+    return onPressStart(ev, ev.offsetX, ev.offsetY);
   };
   DOMnode.onmousemove = function (ev) {
-    return onPressDrag(ev.movementX, ev.movementY);
+    return onPressDrag(ev, ev.movementX, ev.movementY);
   };
   DOMnode.onmouseup = function (ev) {
-    return onPressEnd(ev.offsetX, ev.offsetY);
+    return onPressEnd(ev, ev.offsetX, ev.offsetY);
   };
   DOMnode.ontouchstart = function (ev) {
-    return onPressStart(ev.offsetX, ev.offsetY);
+    return onPressStart(ev, ev.offsetX, ev.offsetY);
   };
   DOMnode.ontouchmove = function (ev) {
-    return onPressDrag(ev.movementX, ev.movementY);
+    return onPressDrag(ev, ev.movementX, ev.movementY);
   };
   DOMnode.ontouchend = function (ev) {
-    return onPressEnd(ev.offsetX, ev.offsetY);
+    return onPressEnd(ev, ev.offsetX, ev.offsetY);
   };
 };
 

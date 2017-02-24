@@ -79,11 +79,13 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
   let pressStart = null;
   let isDrag = false;
 
-  const onPressStart = (cx, cy) => {
+  const onPressStart = (ev, cx, cy) => {
+    ev.preventDefault();
     isPressed = true;
     pressStart = Date.now();
   };
-  const onPressEnd = (cx, cy) => {
+  const onPressEnd = (ev, cx, cy) => {
+    ev.preventDefault();
     if (!isDrag && Date.now() - pressStart < 400) {
       onClick(cx, cy);
     }
@@ -93,7 +95,8 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
     isDrag = false;
   };
 
-  const onPressDrag = (dx, dy) => {
+  const onPressDrag = (ev, dx, dy) => {
+    ev.preventDefault();
     if (!isPressed) {
       return;
     }
@@ -102,12 +105,12 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
     onDrag(100 * dx / app.clientWidth, 100 * dy / app.clientHeight);
   };
 
-  DOMnode.onmousedown = (ev) => onPressStart(ev.offsetX, ev.offsetY);
-  DOMnode.onmousemove = (ev) => onPressDrag(ev.movementX, ev.movementY);
-  DOMnode.onmouseup = (ev) => onPressEnd(ev.offsetX, ev.offsetY);
-  DOMnode.ontouchstart = (ev) => onPressStart(ev.offsetX, ev.offsetY);
-  DOMnode.ontouchmove = (ev) => onPressDrag(ev.movementX, ev.movementY);
-  DOMnode.ontouchend = (ev) => onPressEnd(ev.offsetX, ev.offsetY);
+  DOMnode.onmousedown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
+  DOMnode.onmousemove = (ev) => onPressDrag(ev, ev.movementX, ev.movementY);
+  DOMnode.onmouseup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
+  DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
+  DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.movementX, ev.movementY);
+  DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
 bindInputs(app, {onClick, onDrag});
