@@ -19,11 +19,12 @@
     "cors": "2.8.1",
     "emoji-keywords": "1.0.1",
     "express": "4.14.1",
-    "express-ws": "3.0.0",
+    "http": "0.0.0",
     "lodash": "4.17.4",
     "node-uuid": "1.4.7",
     "pg": "6.1.2",
-    "pg-native": "^1.10.0"
+    "pg-native": "1.10.0",
+    "socket.io": "1.7.3"
   },
   "devDependencies": {
     "babel-cli": "6.23.0",

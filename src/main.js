@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import express from 'express';
-import expressWs from 'express-ws';
+import SocketIO from 'socket.io';
 import cors from 'cors';
 import compression from 'compression';
 import bodyParser from 'body-parser';
@@ -13,7 +13,8 @@ import {isUUID, isEmoji} from './utils';
 
 
 const app = express();
-const exprWs = expressWs(app);
+const server = require('http').Server(app);
+const io = SocketIO(server);
 
 app.use(bodyParser.json({limit: '50mb'}));       // json body parser
 app.use(compression());
@@ -21,24 +22,9 @@ app.use(cors());
 app.use(express.static('public'));
 app.use(request_logger);
 
-
-let websockets = [];
-app.ws('/likes', (ws, req) => {
-  ws.on('open', () => websockets.push(ws));
-  ws.on('close', () => websockets = _.remove(websockets, ws));
-});
-
-var likesWs = exprWs.getWss('/likes');
 const broadcastUpdate = (payload) => {
-  likesWs.clients.forEach((client) => {
-    if (client.readyStatus > 1) {
-      return;
-    }
-
-    client.send(JSON.stringify(payload));
-  });
+  io.emit(JSON.stringify(payload));
 }
-
 
 app.options('*', cors());
 app.get('/ping', (req, res) => res.status(200).send('pong'));

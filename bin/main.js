@@ -8,9 +8,9 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _expressWs = require('express-ws');
+var _socket = require('socket.io');
 
-var _expressWs2 = _interopRequireDefault(_expressWs);
+var _socket2 = _interopRequireDefault(_socket);
 
 var _cors = require('cors');
 
@@ -43,7 +43,8 @@ var _utils = require('./utils');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var app = (0, _express2.default)();
-var exprWs = (0, _expressWs2.default)(app);
+var server = require('http').Server(app);
+var io = (0, _socket2.default)(server);
 
 app.use(_bodyParser2.default.json({ limit: '50mb' })); // json body parser
 app.use((0, _compression2.default)());
@@ -51,25 +52,8 @@ app.use((0, _cors2.default)());
 app.use(_express2.default.static('public'));
 app.use(_middleware.request_logger);
 
-var websockets = [];
-app.ws('/likes', function (ws, req) {
-  ws.on('open', function () {
-    return websockets.push(ws);
-  });
-  ws.on('close', function () {
-    return websockets = _lodash2.default.remove(websockets, ws);
-  });
-});
-
-var likesWs = exprWs.getWss('/likes');
 var broadcastUpdate = function broadcastUpdate(payload) {
-  likesWs.clients.forEach(function (client) {
-    if (client.readyStatus > 1) {
-      return;
-    }
-
-    client.send(JSON.stringify(payload));
-  });
+  io.emit(JSON.stringify(payload));
 };
 
 app.options('*', (0, _cors2.default)());
@@ -137,7 +121,7 @@ app.get('/likes/:proj_id', (0, _middleware.action)(function (req, res) {
   });
 }));
 
-var port = process.env.NODE_PORT || (process.env.NODE_ENV == 'production' ? 80 : 5000);
+var port = process.env.PORT || 5000;
 
 app.listen(port, function () {
   console.log('app is listening on port ' + port + '!');
