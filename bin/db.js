@@ -60,36 +60,35 @@ var insert = exports.insert = function insert(q, args) {
 
 var DB = {
   projects: {
-    get: function get(_ref) {
-      var name = _ref.name;
-      return query('select id. name from projects where name = $1', [name]);
+    get: function get() {
+      return query('select id, name from projects');
     }
   },
   users: {
-    get: function get(_ref2) {
-      var id = _ref2.id;
+    get: function get(_ref) {
+      var id = _ref.id;
       return query('select * from users where id = $1', [id]);
     },
-    put: function put(_ref3) {
-      var id = _ref3.id,
-          name = _ref3.name;
+    put: function put(_ref2) {
+      var id = _ref2.id,
+          name = _ref2.name;
       return query('insert into users values ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [id, name]);
     }
   },
   reactions: {
-    get: function get(_ref4) {
-      var project_id = _ref4.project_id;
+    get: function get(_ref3) {
+      var project_id = _ref3.project_id;
       return query('select * from reactions where project_id = $1', [project_id]);
     },
-    getUser: function getUser(_ref5) {
-      var project_id = _ref5.project_id,
-          user_id = _ref5.user_id;
+    getUser: function getUser(_ref4) {
+      var project_id = _ref4.project_id,
+          user_id = _ref4.user_id;
       return query('select emoji, created_at from reactions where project_id = $1 and user_id = $2', [project_id, user_id]);
     },
-    put: function put(_ref6) {
-      var project_id = _ref6.project_id,
-          user_id = _ref6.user_id,
-          emoji = _ref6.emoji;
+    put: function put(_ref5) {
+      var project_id = _ref5.project_id,
+          user_id = _ref5.user_id,
+          emoji = _ref5.emoji;
       return query('insert into reactions (project_id, user_id, emoji) values ($1, $2, $3)', [project_id, user_id, emoji]);
     }
   }

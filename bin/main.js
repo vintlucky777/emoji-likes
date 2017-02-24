@@ -112,7 +112,7 @@ app.put('/likes/:proj_id', _middleware.auth, (0, _middleware.action)(function (r
 
     if (!_lodash2.default.includes(reactions, emoji)) {
       return _db2.default.reactions.put({ project_id: project_id, user_id: user_id, emoji: emoji }).then(function () {
-        broadcastUpdate({ project_id: project_id, user: { id: user_id, name: user_name }, emoji: emoji });
+        broadcastUpdate({ project_id: project_id, user_name: user_name, emoji: emoji });
         res.send({ reactions: _lodash2.default.concat(reactions, emoji) });
       });
     }
@@ -132,6 +132,13 @@ app.get('/likes/:proj_id', (0, _middleware.action)(function (req, res) {
   return _db2.default.reactions.get({ project_id: project_id }).then(function (result) {
     var reactions = _lodash2.default.map(result, 'emoji');
     res.send({ reactions: reactions });
+  });
+}));
+
+app.get('/projects', (0, _middleware.action)(function () {
+  return _db2.default.projects.get().then(function (result) {
+    var projects = _lodash2.default.map(result, ['id', 'name']);
+    res.send({ projects: projects });
   });
 }));
 
