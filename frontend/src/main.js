@@ -145,7 +145,7 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
   DOMnode.onmousemove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetY);
   DOMnode.onmouseup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
   DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.movementX, ev.movementY);
+  DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetY);
   DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
   // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
   // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
