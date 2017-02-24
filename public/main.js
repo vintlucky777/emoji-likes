@@ -95,10 +95,12 @@ var renderBubbles = function renderBubbles() {
   renderDOM(elems);
 };
 
-var effectRadiusInv = .34;
-var effectBrokeInv = 1.5;
-var effectScale = 1.5;
-var effectScaleToRadMult = .25;
+var effect = {
+  BrokeInv: 1.56,
+  RadiusInv: .26,
+  Scale: 1.7,
+  ScaleToRadMult: .38
+};
 var animate = function animate() {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
@@ -107,10 +109,10 @@ var animate = function animate() {
   _.map(bubbles, function (b, i) {
     var pos_x = mesh[i][0] + offset.x;
     var pos_y = mesh[i][1] + offset.y;
-    var r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effectRadiusInv;
-    var R = Math.max(0, Math.min(effectScale - (effectScale - 1) * effectBrokeInv * r, (1 - r) * effectBrokeInv / (effectBrokeInv - 1)));
-    var r_mult = 1 + R * effectScaleToRadMult;
-    b.setAttribute('style', '      transform: translate3d(' + 110 * pos_x * r_mult + '%, ' + 110 * pos_y * r_mult + '%, ' + 10 * R + 'px) scale3d(' + R + ', ' + R + ', 1)');
+    var r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effect.RadiusInv;
+    var R = Math.max(0, Math.min(effect.Scale - (effect.Scale - 1) * effect.BrokeInv * r, (1 - r) * effect.BrokeInv / (effect.BrokeInv - 1)));
+    var r_mult = 1 + R * effect.ScaleToRadMult;
+    b.setAttribute('style', '      transform: translate3d(' + 110 * pos_x * r_mult + '%, ' + 110 * pos_y * r_mult + '%, ' + 100 * R + 'px) scale3d(' + R + ', ' + R + ', 1)');
   });
 
   isAnimating && requestAnimationFrame(animate);
@@ -144,7 +146,6 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
   };
 
   var onPressDrag = function onPressDrag(ev, cx, cy) {
-    console.log({ ev: ev });
     ev.preventDefault();
 
     var _dx = 100 * (cx - cursor.x) / app.clientWidth;
@@ -181,6 +182,12 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
     return onPressDrag(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
   DOMnode.ontouchend = function (ev) {
+    return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
+  };
+  DOMnode.ontouchleave = function (ev) {
+    return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
+  };
+  DOMnode.ontouchcancel = function (ev) {
     return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
   // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);

@@ -73,10 +73,12 @@ const renderBubbles = () => {
   renderDOM(elems);
 }
 
-const effectRadiusInv = .34;
-const effectBrokeInv = 1.5;
-const effectScale = 1.5;
-const effectScaleToRadMult = .25;
+const effect = {
+  BrokeInv: 1.56,
+  RadiusInv: .26,
+  Scale: 1.7,
+  ScaleToRadMult: .38,
+};
 const animate = () => {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
@@ -85,11 +87,11 @@ const animate = () => {
   _.map(bubbles, (b, i) => {
     const pos_x = mesh[i][0] + offset.x;
     const pos_y = mesh[i][1] + offset.y;
-    const r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effectRadiusInv;
-    const R = Math.max(0, Math.min(effectScale - (effectScale - 1) * effectBrokeInv * r,
-                                   (1 - r) * effectBrokeInv / (effectBrokeInv - 1)));
-    const r_mult = 1 + R * effectScaleToRadMult;
-    b.setAttribute('style', `      transform: translate3d(${110 * pos_x * r_mult}%, ${110 * pos_y * r_mult}%, ${10*R}px) scale3d(${R}, ${R}, 1)`);
+    const r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effect.RadiusInv;
+    const R = Math.max(0, Math.min(effect.Scale - (effect.Scale - 1) * effect.BrokeInv * r,
+                                   (1 - r) * effect.BrokeInv / (effect.BrokeInv - 1)));
+    const r_mult = 1 + R * effect.ScaleToRadMult;
+    b.setAttribute('style', `      transform: translate3d(${110 * pos_x * r_mult}%, ${110 * pos_y * r_mult}%, ${100*R}px) scale3d(${R}, ${R}, 1)`);
   })
 
   isAnimating && requestAnimationFrame(animate);
@@ -120,7 +122,6 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
   };
 
   const onPressDrag = (ev, cx, cy) => {
-    console.log({ev})
     ev.preventDefault();
 
     const _dx = 100 * (cx - cursor.x) / app.clientWidth;
@@ -147,6 +148,8 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
   DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
+  DOMnode.ontouchleave = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
+  DOMnode.ontouchcancel = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
   // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
   // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
