@@ -8,7 +8,7 @@
     "start": "nodemon --exec npm run babel-node -- src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-server": "babel src -d bin",
-    "build-fe": "babel frontend/src --out-file public/main.js && lessc frontend/less/main.less public/styles.css"
+    "build-fe": "babel frontend/src -d public && lessc frontend/less/main.less public/styles.css"
   },
   "author": "Victor Klochikhin",
   "license": "MIT",
