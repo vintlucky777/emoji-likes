@@ -8,9 +8,13 @@ var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
 
-var _socket = require('socket.io');
+var _http = require('http');
 
-var _socket2 = _interopRequireDefault(_socket);
+var _http2 = _interopRequireDefault(_http);
+
+var _ws = require('ws');
+
+var _ws2 = _interopRequireDefault(_ws);
 
 var _cors = require('cors');
 
@@ -43,8 +47,8 @@ var _utils = require('./utils');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var app = (0, _express2.default)();
-var server = require('http').Server(app);
-var io = (0, _socket2.default)(server);
+var server = _http2.default.createServer(app);
+var wss = new _ws2.default.Server({ server: server });
 
 app.use(_bodyParser2.default.json({ limit: '50mb' })); // json body parser
 app.use((0, _compression2.default)());
@@ -52,8 +56,18 @@ app.use((0, _cors2.default)());
 app.use(_express2.default.static('public'));
 app.use(_middleware.request_logger);
 
+wss.on('connection', function (ws) {
+  // const location = url.parse(ws.upgradeReq.url, true);
+  // console.log('Client connected');
+  ws.on('close', function () {
+    return console.log('Client disconnected');
+  });
+});
+
 var broadcastUpdate = function broadcastUpdate(payload) {
-  io.emit(JSON.stringify(payload));
+  wss.clients.forEach(function (client) {
+    client.send(JSON.stringify(payload));
+  });
 };
 
 app.options('*', (0, _cors2.default)());
@@ -123,6 +137,6 @@ app.get('/likes/:proj_id', (0, _middleware.action)(function (req, res) {
 
 var port = process.env.PORT || 5000;
 
-app.listen(port, function () {
+server.listen(port, function () {
   console.log('app is listening on port ' + port + '!');
 });

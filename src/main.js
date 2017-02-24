@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import express from 'express';
-import SocketIO from 'socket.io';
+import http from 'http';
+import WebSocket from 'ws';
 import cors from 'cors';
 import compression from 'compression';
 import bodyParser from 'body-parser';
@@ -13,8 +14,8 @@ import {isUUID, isEmoji} from './utils';
 
 
 const app = express();
-const server = require('http').Server(app);
-const io = SocketIO(server);
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
 
 app.use(bodyParser.json({limit: '50mb'}));       // json body parser
 app.use(compression());
@@ -22,8 +23,16 @@ app.use(cors());
 app.use(express.static('public'));
 app.use(request_logger);
 
+wss.on('connection', (ws) => {
+  // const location = url.parse(ws.upgradeReq.url, true);
+  // console.log('Client connected');
+  ws.on('close', () => console.log('Client disconnected'));
+});
+
 const broadcastUpdate = (payload) => {
-  io.emit(JSON.stringify(payload));
+  wss.clients.forEach((client) => {
+    client.send(JSON.stringify(payload));
+  });
 }
 
 app.options('*', cors());
@@ -93,6 +102,6 @@ app.get('/likes/:proj_id', action((req, res) => {
 
 const port = process.env.PORT || 5000;
 
-app.listen(port, function () {
+server.listen(port, function () {
   console.log(`app is listening on port ${port}!`)
 });
