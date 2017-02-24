@@ -71,17 +71,17 @@ app.put('/likes/:proj_id', auth, action((req, res) => {
   const user_name = req.user.name;
   return DB.reactions.getUser({project_id, user_id})
     .then((result) => {
-      const reactions = _.uniq(_.map(result, 'emoji'));
+      const likes = _.uniq(_.map(result, 'emoji'));
 
-      if (!_.includes(reactions, emoji)) {
-        return DB.reactions.put({project_id, user_id, emoji})
+      if (!_.includes(likes, emoji)) {
+        return DB.likes.put({project_id, user_id, emoji})
           .then(() => {
             broadcastUpdate({project_id, user_name, emoji});
-            res.send({reactions: _.concat(reactions, emoji)})
+            res.send({likes: _.concat(likes, emoji)})
           });
       }
 
-      res.send({reactions});
+      res.send({likes});
     });
 }));
 
@@ -95,15 +95,14 @@ app.get('/likes/:proj_id', action((req, res) => {
 
   return DB.reactions.get({project_id})
     .then((result) => {
-      const reactions = _.map(result, 'emoji');
-      res.send({reactions});
+      const likes = _.map(result, 'emoji');
+      res.send({likes});
     });
 }));
 
-app.get('/projects', action(() => {
+app.get('/projects', action((req, res) => {
   return DB.projects.get()
-    .then((result) => {
-      const projects = _.map(result, ['id', 'name']);
+    .then((projects) => {
       res.send({projects});
     });
 }));
