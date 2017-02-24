@@ -2,7 +2,7 @@
 
 document.body.innerHtml = '<h2>Initializing...</h2>';
 
-ws = new WebSocket('wss://clojure-likes.herokuapp.com/');
-ws.onmessage = function (msg) {
-  return document.write(msg + '<br/>');
+var ws = new WebSocket('wss://clojure-likes.herokuapp.com/');
+ws.onmessage = function (ev) {
+  return document.write(ev.data.user_name + ': :' + ev.data.emoji + ':' + '<br/>');
 };
