@@ -75,7 +75,7 @@ var DB = {
       return query('insert into users values ($1, $2) ON CONFLICT (id) DO UPDATE SET name = $2', [id, name]);
     }
   },
-  reactions: {
+  likes: {
     get: function get(_ref3) {
       var project_id = _ref3.project_id;
       return query('select * from reactions where project_id = $1', [project_id]);

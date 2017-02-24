@@ -107,7 +107,7 @@ app.put('/likes/:proj_id', _middleware.auth, (0, _middleware.action)(function (r
 
   var user_id = req.user.id;
   var user_name = req.user.name;
-  return _db2.default.reactions.getUser({ project_id: project_id, user_id: user_id }).then(function (result) {
+  return _db2.default.likes.getUser({ project_id: project_id, user_id: user_id }).then(function (result) {
     var likes = _lodash2.default.uniq(_lodash2.default.map(result, 'emoji'));
 
     if (!_lodash2.default.includes(likes, emoji)) {
@@ -129,7 +129,7 @@ app.get('/likes/:proj_id', (0, _middleware.action)(function (req, res) {
     return;
   }
 
-  return _db2.default.reactions.get({ project_id: project_id }).then(function (result) {
+  return _db2.default.likes.get({ project_id: project_id }).then(function (result) {
     var likes = _lodash2.default.map(result, 'emoji');
     res.send({ likes: likes });
   });
