@@ -175,13 +175,13 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
     return onPressEnd(ev, ev.offsetX, ev.offsetY);
   };
   DOMnode.ontouchstart = function (ev) {
-    return onPressStart(ev, ev.changedTouches[0].offsetX, ev.changedTouches[0].offsetY);
+    return onPressStart(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
   DOMnode.ontouchmove = function (ev) {
-    return onPressDrag(ev, ev.changedTouches[0].offsetX, ev.changedTouches[0].offsetY);
+    return onPressDrag(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
   DOMnode.ontouchend = function (ev) {
-    return onPressEnd(ev, ev.changedTouches[0].offsetX, ev.changedTouches[0].offsetY);
+    return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
   // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
   // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
