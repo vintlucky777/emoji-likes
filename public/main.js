@@ -57,7 +57,7 @@ var initUser = function initUser() {
 var user = initUser();
 
 var app = document.querySelector('#app');
-var render = function render(elems) {
+var renderDOM = function renderDOM(elems) {
   var tree = tag('.root', {}, elems);
   var overlay = tag('.overlay');
 
@@ -68,27 +68,57 @@ var render = function render(elems) {
 
 var offset = { x: 0, y: 0 };
 var onDrag = function onDrag(rx, ry) {
-  offset.x += rx;
-  offset.y += ry;
-  // console.log('onDrag', {rx, ry});
+  var sensitivity = 0.07;
+  offset.x += rx * sensitivity;
+  offset.y += ry * sensitivity;
 };
 var onClick = function onClick(x, y) {
   console.log('onClick', { x: x, y: y });
 };
 
 var isAnimating = true;
-var emojis = null;
-var renderLoop = function renderLoop() {
-  if (!emojis) {
-    emojis = document.querySelectorAll('.emoji');
-    console.log({ emojis: emojis });
-  }
-  isAnimating && requestAnimationFrame(renderLoop);
+var bubbles = null;
+var mesh = _.flatten(_.map(_.range(-4, 5), function (y) {
+  return _.map(_.range(-4, 5), function (x) {
+    return [x + 0.5 * (y % 2), y * Math.sqrt(3) * 0.5];
+  });
+}));
+
+var renderBubbles = function renderBubbles() {
+  var elems = _.map(mesh, function (_ref, i) {
+    var _ref2 = _slicedToArray(_ref, 2),
+        x = _ref2[0],
+        y = _ref2[1];
+
+    return tag('.bubble', { style: 'transform: translate3d(0)' }, ['' + i]);
+  });
+  renderDOM(elems);
 };
 
-var bindInputs = function bindInputs(DOMnode, _ref) {
-  var onClick = _ref.onClick,
-      onDrag = _ref.onDrag;
+var effectRadiusInv = .34;
+var effectBrokeInv = 1.5;
+var effectScale = 1.5;
+var effectScaleToRadMult = .25;
+var animate = function animate() {
+  if (!bubbles) {
+    bubbles = document.querySelectorAll('.bubble');
+  }
+
+  _.map(bubbles, function (b, i) {
+    var pos_x = mesh[i][0] + offset.x;
+    var pos_y = mesh[i][1] + offset.y;
+    var r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effectRadiusInv;
+    var R = Math.max(0, Math.min(effectScale - (effectScale - 1) * effectBrokeInv * r, (1 - r) * effectBrokeInv / (effectBrokeInv - 1)));
+    var r_mult = 1 + R * effectScaleToRadMult;
+    b.setAttribute('style', '      transform: translate3d(' + 110 * pos_x * r_mult + '%, ' + 110 * pos_y * r_mult + '%, ' + 10 * R + 'px) scale3d(' + R + ', ' + R + ', 1)');
+  });
+
+  isAnimating && requestAnimationFrame(animate);
+};
+
+var bindInputs = function bindInputs(DOMnode, _ref3) {
+  var onClick = _ref3.onClick,
+      onDrag = _ref3.onDrag;
 
   var isPressed = false;
   var pressStart = null;
@@ -142,23 +172,6 @@ var bindInputs = function bindInputs(DOMnode, _ref) {
 
 bindInputs(app, { onClick: onClick, onDrag: onDrag });
 
-var initApp = function initApp() {
-  var mesh = _.flatten(_.map(_.range(-480, 481, 120), function (x) {
-    return _.map(_.range(-480, 481, 120), function (y) {
-      return [x, y];
-    });
-  }));
-  var elems = _.map(mesh, function (_ref2) {
-    var _ref3 = _slicedToArray(_ref2, 2),
-        x = _ref3[0],
-        y = _ref3[1];
-
-    return tag('.emoji', { style: 'transform: translate3d(' + x + '%, ' + y + '%, 0)' });
-  });
-
-  render(elems);
-};
-
 fetch('/likes/1').then(function (r) {
   return r.json();
 }).then(function (resp) {
@@ -180,5 +193,5 @@ fetch('/likes/1').then(function (r) {
   };
 });
 
-initApp();
-renderLoop();
+renderBubbles();
+animate();

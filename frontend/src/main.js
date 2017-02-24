@@ -45,7 +45,7 @@ const initUser = () => {
 const user = initUser();
 
 const app = document.querySelector('#app');
-const render = (elems) => {
+const renderDOM = (elems) => {
   const tree = tag('.root', {}, elems);
   const overlay = tag('.overlay');
 
@@ -56,22 +56,43 @@ const render = (elems) => {
 
 const offset = {x: 0, y: 0};
 const onDrag = (rx, ry) => {
-  offset.x += rx;
-  offset.y += ry;
-  // console.log('onDrag', {rx, ry});
+  const sensitivity = 0.07;
+  offset.x += rx * sensitivity;
+  offset.y += ry * sensitivity;
 };
 const onClick = (x, y) => {
   console.log('onClick', {x, y});
 };
 
 let isAnimating = true;
-let emojis = null;
-const renderLoop = () => {
-  if (!emojis) {
-    emojis = document.querySelectorAll('.emoji');
-    console.log({emojis})
+let bubbles = null;
+const mesh = _.flatten(_.map(_.range(-4, 5), y => _.map(_.range(-4, 5), x => [x + (0.5 * (y % 2)), y * Math.sqrt(3) * 0.5])));
+
+const renderBubbles = () => {
+  const elems = _.map(mesh, ([x, y], i) => tag('.bubble', {style: `transform: translate3d(0)`}, [`${i}`]));
+  renderDOM(elems);
+}
+
+const effectRadiusInv = .34;
+const effectBrokeInv = 1.5;
+const effectScale = 1.5;
+const effectScaleToRadMult = .25;
+const animate = () => {
+  if (!bubbles) {
+    bubbles = document.querySelectorAll('.bubble');
   }
-  isAnimating && requestAnimationFrame(renderLoop);
+
+  _.map(bubbles, (b, i) => {
+    const pos_x = mesh[i][0] + offset.x;
+    const pos_y = mesh[i][1] + offset.y;
+    const r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effectRadiusInv;
+    const R = Math.max(0, Math.min(effectScale - (effectScale - 1) * effectBrokeInv * r,
+                                   (1 - r) * effectBrokeInv / (effectBrokeInv - 1)));
+    const r_mult = 1 + R * effectScaleToRadMult;
+    b.setAttribute('style', `      transform: translate3d(${110 * pos_x * r_mult}%, ${110 * pos_y * r_mult}%, ${10*R}px) scale3d(${R}, ${R}, 1)`);
+  })
+
+  isAnimating && requestAnimationFrame(animate);
 };
 
 const bindInputs = (DOMnode, {onClick, onDrag}) => {
@@ -115,13 +136,6 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
 
 bindInputs(app, {onClick, onDrag});
 
-const initApp = () => {
-  const mesh = _.flatten(_.map(_.range(-480, 481, 120), x => _.map(_.range(-480, 481, 120), y => [x, y])));
-  const elems = _.map(mesh, ([x, y]) => tag('.emoji', {style: `transform: translate3d(${x}%, ${y}%, 0)`}));
-
-  render(elems);
-}
-
 fetch('/likes/1')
   .then(r => r.json())
   .then(resp => {
@@ -143,5 +157,5 @@ fetch('/likes/1')
     };
 });
 
-initApp();
-renderLoop();
+renderBubbles();
+animate();
