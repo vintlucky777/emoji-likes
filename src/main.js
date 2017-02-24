@@ -105,7 +105,7 @@ app.get('/likes/:proj_id', action((req, res) => {
     });
 }));
 
-const port = process.env.NODE_PORT || 5000
+const port = process.env.PORT || 5000;
 
 app.listen(port, function () {
   console.log(`app is listening on port ${port}!`)

@@ -8,29 +8,29 @@
     "start": "nodemon --exec npm run babel-node -- src/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-server": "babel src -d bin",
-    "build-fe": "babel frontend/src -d public && lessc frontend/less/main.less public/styles.css"
+    "build-fe": "babel frontend/src --out-file public/main.js && lessc frontend/less/main.less public/styles.css"
   },
   "author": "Victor Klochikhin",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "3.4.7",
+    "body-parser": "1.16.1",
+    "compression": "1.6.2",
+    "cors": "2.8.1",
+    "emoji-keywords": "1.0.1",
     "express": "4.14.1",
     "express-ws": "3.0.0",
-    "node-uuid": "1.4.7"
+    "lodash": "4.17.4",
+    "node-uuid": "1.4.7",
+    "pg": "6.1.2",
+    "pg-native": "^1.10.0"
   },
   "devDependencies": {
     "babel-cli": "6.23.0",
     "babel-core": "6.23.1",
     "babel-preset-latest": "6.22.0",
     "babel-preset-stage-0": "6.22.0",
-    "bluebird": "3.4.7",
-    "body-parser": "1.16.1",
-    "compression": "1.6.2",
-    "cors": "2.8.1",
-    "emoji-keywords": "1.0.1",
-    "lodash": "4.17.4",
     "nodemon": "1.11.0",
-    "pg": "^6.1.2",
-    "pg-native": "^1.10.0",
     "whatwg-fetch": "2.0.2"
   }
 }
