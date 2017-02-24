@@ -144,12 +144,12 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
   DOMnode.onmousedown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
   DOMnode.onmousemove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetY);
   DOMnode.onmouseup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
-  // DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  // DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetY);
-  // DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
-  DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
-  DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
+  DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.changedTouches[0].offsetX, ev.changedTouches[0].offsetY);
+  DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.changedTouches[0].offsetX, ev.changedTouches[0].offsetY);
+  DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.changedTouches[0].offsetX, ev.changedTouches[0].offsetY);
+  // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
+  // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
+  // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
 bindInputs(app, {onClick, onDrag});
