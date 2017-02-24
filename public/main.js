@@ -96,11 +96,17 @@ var renderBubbles = function renderBubbles() {
 };
 
 var effect = {
-  BrokeInv: 1.56,
-  RadiusInv: .26,
-  Scale: 1.7,
+  BrokeInv: 1.8,
+  RadiusInv: .29,
+  Scale: 1.5,
   ScaleToRadMult: .38
 };
+// const effect = {
+//   BrokeInv: 1.56,
+//   RadiusInv: .26,
+//   Scale: 1.7,
+//   ScaleToRadMult: .38,
+// };
 var animate = function animate() {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
