@@ -28,7 +28,7 @@ export const insert = (q, args) => _query(q, args, res => res[0].rowCount)
 
 const DB = {
   projects: {
-    get: ({name}) => query('select id. name from projects where name = $1', [name])
+    get: () => query('select id, name from projects')
   },
   users: {
     get: ({id}) => query('select * from users where id = $1', [id]),

@@ -76,7 +76,7 @@ app.put('/likes/:proj_id', auth, action((req, res) => {
       if (!_.includes(reactions, emoji)) {
         return DB.reactions.put({project_id, user_id, emoji})
           .then(() => {
-            broadcastUpdate({project_id, user: {id: user_id, name: user_name}, emoji});
+            broadcastUpdate({project_id, user_name, emoji});
             res.send({reactions: _.concat(reactions, emoji)})
           });
       }
@@ -97,6 +97,14 @@ app.get('/likes/:proj_id', action((req, res) => {
     .then((result) => {
       const reactions = _.map(result, 'emoji');
       res.send({reactions});
+    });
+}));
+
+app.get('/projects', action(() => {
+  return DB.projects.get()
+    .then((result) => {
+      const projects = _.map(result, ['id', 'name']);
+      res.send({projects});
     });
 }));
 
