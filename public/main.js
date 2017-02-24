@@ -178,7 +178,7 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
     return onPressStart(ev, ev.offsetX, ev.offsetY);
   };
   DOMnode.ontouchmove = function (ev) {
-    return onPressDrag(ev, ev.movementX, ev.movementY);
+    return onPressDrag(ev, ev.offsetX, ev.offsetY);
   };
   DOMnode.ontouchend = function (ev) {
     return onPressEnd(ev, ev.offsetX, ev.offsetY);
