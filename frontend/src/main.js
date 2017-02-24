@@ -99,9 +99,12 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
   let isPressed = false;
   let pressStart = null;
   let isDrag = false;
+  const cursor = {x: 0, y: 0};
 
   const onPressStart = (ev, cx, cy) => {
     ev.preventDefault();
+    cursor.x = cx;
+    cursor.y = cy;
     isPressed = true;
     pressStart = Date.now();
   };
@@ -116,22 +119,37 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
     isDrag = false;
   };
 
-  const onPressDrag = (ev, dx, dy) => {
+  const onPressDrag = (ev, cx, cy) => {
+    console.log({ev})
     ev.preventDefault();
+
+    const _dx = 100 * (cx - cursor.x) / app.clientWidth;
+    const _dy = 100 * (cy - cursor.y) / app.clientWidth;
+
+    cursor.x = cx;
+    cursor.y = cy;
+
     if (!isPressed) {
       return;
     }
 
+    if (!isDrag && Math.abs(_dx) < 1 && Math.abs(_dy) < 1) {
+      return;
+    }
+
     isDrag = true;
-    onDrag(100 * dx / app.clientWidth, 100 * dy / app.clientHeight);
+    onDrag(_dx, _dy);
   };
 
   DOMnode.onmousedown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  DOMnode.onmousemove = (ev) => onPressDrag(ev, ev.movementX, ev.movementY);
+  DOMnode.onmousemove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetY);
   DOMnode.onmouseup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
   DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
   DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.movementX, ev.movementY);
   DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
+  // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
+  // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
+  // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
 bindInputs(app, {onClick, onDrag});
