@@ -69,7 +69,7 @@ app.put('/likes/:proj_id', auth, action((req, res) => {
 
   const user_id = req.user.id;
   const user_name = req.user.name;
-  return DB.reactions.getUser({project_id, user_id})
+  return DB.likes.getUser({project_id, user_id})
     .then((result) => {
       const likes = _.uniq(_.map(result, 'emoji'));
 
@@ -93,7 +93,7 @@ app.get('/likes/:proj_id', action((req, res) => {
     return;
   }
 
-  return DB.reactions.get({project_id})
+  return DB.likes.get({project_id})
     .then((result) => {
       const likes = _.map(result, 'emoji');
       res.send({likes});
