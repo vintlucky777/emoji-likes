@@ -64,7 +64,6 @@ let nameInput = null;
 let bottomlight = null;
 const renderDOM = (elems) => {
   const tree = tag('.root', {}, elems);
-  // const overlay = tag('.overlay');
   const bl = tag('.bottomlight', {}, [tag('.reaction'), tag('.username')]);
 
   if (app) {
@@ -77,14 +76,18 @@ const renderDOM = (elems) => {
     bottomlight = document.querySelector('.bottomlight');
 
     nameInput.value = user.name;
+    if (!user.name) {
+      nameInput.setAttibute('class', 'name-input inviting');
+    }
     nameInput.onblur = (ev) => {
       const name = ev.target.value;
       const u = {...user, name};
+      nameInput.setAttibute('class', 'name-input');
       saveUser(u);
     };
     // handle Enter
     nameInput.onkeydown = (ev) => ev.which === 13 ? nameInput.blur() : ev;
-  }, 10);
+  }, 100);
 };
 
 const offset = {x: 0, y: 0};
@@ -246,7 +249,6 @@ const animate = () => {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
     const emojis = document.querySelectorAll('.bubble div');
-    // _.map(emojis, e => bindInputs(e, {onClick, onDrag}));
     _.map(emojis, e => bindInputs(e, {onClick, onDrag, onDragStart, onDragEnd, onActualClick: () => sendEmoji(e.getAttribute('title'))}));
   }
 
@@ -319,9 +321,6 @@ const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd, onActualC
   DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   DOMnode.ontouchcancel = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
-  // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
-  // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
 const onDragStart = () => {
@@ -335,7 +334,6 @@ const onDragEnd = () => {
   }
 };
 
-// bindInputs(app, {onClick, onDrag});
 bindInputs(app, {onClick, onDrag, onDragStart, onDragEnd});
 
 fetch('/likes/1')
