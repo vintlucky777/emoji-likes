@@ -93,6 +93,7 @@ var renderDOM = function renderDOM(elems) {
     root = document.querySelector('.root');
     bottomlight = document.querySelector('.bottomlight');
 
+    nameInput.value = user.name;
     nameInput.onblur = function (ev) {
       var name = ev.target.value;
       var u = _extends({}, user, { name: name });
