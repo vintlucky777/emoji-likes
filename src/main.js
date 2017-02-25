@@ -31,7 +31,7 @@ wss.on('connection', (ws) => {
 
 const broadcastUpdate = (payload) => {
   wss.clients.forEach((client) => {
-    client.send(JSON.stringify({message: payload}));
+    client.send(JSON.stringify(payload));
   });
 }
 
