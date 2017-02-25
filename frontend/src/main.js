@@ -76,6 +76,7 @@ const renderDOM = (elems) => {
     root = document.querySelector('.root');
     bottomlight = document.querySelector('.bottomlight');
 
+    nameInput.value = user.name;
     nameInput.onblur = (ev) => {
       const name = ev.target.value;
       const u = {...user, name};
