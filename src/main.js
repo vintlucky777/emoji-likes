@@ -74,15 +74,11 @@ app.put('/likes/:proj_id', auth, action((req, res) => {
     .then((result) => {
       const likes = _.uniq(_.map(result, 'emoji'));
 
-      if (!_.includes(likes, emoji)) {
-        return DB.likes.put({project_id, user_id, emoji})
-          .then(() => {
-            broadcastUpdate({project_id, user_name, emoji});
-            res.send({likes: _.concat(likes, emoji)})
-          });
-      }
-
-      res.send({likes});
+      return DB.likes.put({project_id, user_id, emoji})
+        .then(() => {
+          broadcastUpdate({project_id, user_name, emoji});
+          res.send({likes: _.concat(likes, emoji)})
+        });
     });
 }));
 
