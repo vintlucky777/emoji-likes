@@ -45,6 +45,7 @@ const initUser = () => {
 const user = initUser();
 
 const app = document.querySelector('#app');
+let root = null;
 const renderDOM = (elems) => {
   const tree = tag('.root', {}, elems);
   const overlay = tag('.overlay');
@@ -52,6 +53,8 @@ const renderDOM = (elems) => {
   if (app) {
     app.innerHTML = tree + overlay;
   }
+
+  setTimeout(() => root = document.querySelector('.root'), 10);
 };
 
 const offset = {x: 0, y: 0};
@@ -159,7 +162,7 @@ const renderBubbles = () => {
     ..._.map(mesh, ([x, y], i) => tag('.bubble', {style: `transform: translate3d(0)`}, [emojis[i]])),
   ];
   renderDOM(elems);
-  emojify.setConfig({tag: 'div', mode: 'data-url'});
+  emojify.setConfig({tag_type: 'div', mode: 'data-url'});
   emojify.run();
 }
 
@@ -179,6 +182,9 @@ const effect = {
 const animate = () => {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
+    const emojis = document.querySelectorAll('.bubble div');
+    // _.map(emojis, e => bindInputs(e, {onClick, onDrag}));
+    _.map(emojis, e => bindInputs(e, {onClick, onDrag, onDragStart, onDragEnd}));
   }
 
   _.map(bubbles, (b, i) => {
@@ -194,7 +200,8 @@ const animate = () => {
   isAnimating && requestAnimationFrame(animate);
 };
 
-const bindInputs = (DOMnode, {onClick, onDrag}) => {
+const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd}) => {
+// const bindInputs = (DOMnode, {onClick, onDrag}) => {
   let isPressed = false;
   let pressStart = null;
   let isDrag = false;
@@ -216,6 +223,7 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
     isPressed = false;
     pressStart = null;
     isDrag = false;
+    onDragEnd();
   };
 
   const onPressDrag = (ev, cx, cy) => {
@@ -224,35 +232,47 @@ const bindInputs = (DOMnode, {onClick, onDrag}) => {
     const _dx = 100 * (cx - cursor.x) / app.clientWidth;
     const _dy = 100 * (cy - cursor.y) / app.clientWidth;
 
-    cursor.x = cx;
-    cursor.y = cy;
-
     if (!isPressed) {
       return;
     }
 
-    if (!isDrag && Math.abs(_dx) < 1 && Math.abs(_dy) < 1) {
+    cursor.x = cx;
+    cursor.y = cy;
+
+    if (!isDrag && Math.abs(_dx) < .5 && Math.abs(_dy) < .5) {
       return;
     }
 
     isDrag = true;
+    onDragStart();
     onDrag(_dx, _dy);
   };
 
-  DOMnode.onmousedown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  DOMnode.onmousemove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetY);
-  DOMnode.onmouseup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
+  DOMnode.onmousedown = (ev) => onPressStart(ev, ev.pageX, ev.pageY);
+  DOMnode.onmousemove = (ev) => onPressDrag(ev, ev.pageX, ev.pageY);
+  DOMnode.onmouseup = (ev) => onPressEnd(ev, ev.pageX, ev.pageY);
   DOMnode.ontouchstart = (ev) => onPressStart(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   DOMnode.ontouchmove = (ev) => onPressDrag(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   DOMnode.ontouchend = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
-  DOMnode.ontouchleave = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   DOMnode.ontouchcancel = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
   // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
   // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
-bindInputs(app, {onClick, onDrag});
+const onDragStart = () => {
+  if (root) {
+    root.className = 'root dragged';
+  }
+};
+const onDragEnd = () => {
+  if (root) {
+    root.className = 'root';
+  }
+};
+
+// bindInputs(app, {onClick, onDrag});
+bindInputs(app, {onClick, onDrag, onDragStart, onDragEnd});
 
 fetch('/likes/1')
   .then(r => r.json())

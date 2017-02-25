@@ -57,6 +57,7 @@ var initUser = function initUser() {
 var user = initUser();
 
 var app = document.querySelector('#app');
+var root = null;
 var renderDOM = function renderDOM(elems) {
   var tree = tag('.root', {}, elems);
   var overlay = tag('.overlay');
@@ -64,6 +65,10 @@ var renderDOM = function renderDOM(elems) {
   if (app) {
     app.innerHTML = tree + overlay;
   }
+
+  setTimeout(function () {
+    return root = document.querySelector('.root');
+  }, 10);
 };
 
 var offset = { x: 0, y: 0 };
@@ -96,7 +101,7 @@ var renderBubbles = function renderBubbles() {
     return tag('.bubble', { style: 'transform: translate3d(0)' }, [emojis[i]]);
   })));
   renderDOM(elems);
-  emojify.setConfig({ tag: 'div', mode: 'data-url' });
+  emojify.setConfig({ tag_type: 'div', mode: 'data-url' });
   emojify.run();
 };
 
@@ -116,6 +121,11 @@ var effect = {
 var animate = function animate() {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
+    var _emojis = document.querySelectorAll('.bubble div');
+    // _.map(emojis, e => bindInputs(e, {onClick, onDrag}));
+    _.map(_emojis, function (e) {
+      return bindInputs(e, { onClick: onClick, onDrag: onDrag, onDragStart: onDragStart, onDragEnd: onDragEnd });
+    });
   }
 
   _.map(bubbles, function (b, i) {
@@ -132,8 +142,11 @@ var animate = function animate() {
 
 var bindInputs = function bindInputs(DOMnode, _ref3) {
   var onClick = _ref3.onClick,
-      onDrag = _ref3.onDrag;
+      onDrag = _ref3.onDrag,
+      onDragStart = _ref3.onDragStart,
+      onDragEnd = _ref3.onDragEnd;
 
+  // const bindInputs = (DOMnode, {onClick, onDrag}) => {
   var isPressed = false;
   var pressStart = null;
   var isDrag = false;
@@ -155,6 +168,7 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
     isPressed = false;
     pressStart = null;
     isDrag = false;
+    onDragEnd();
   };
 
   var onPressDrag = function onPressDrag(ev, cx, cy) {
@@ -163,29 +177,30 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
     var _dx = 100 * (cx - cursor.x) / app.clientWidth;
     var _dy = 100 * (cy - cursor.y) / app.clientWidth;
 
-    cursor.x = cx;
-    cursor.y = cy;
-
     if (!isPressed) {
       return;
     }
 
-    if (!isDrag && Math.abs(_dx) < 1 && Math.abs(_dy) < 1) {
+    cursor.x = cx;
+    cursor.y = cy;
+
+    if (!isDrag && Math.abs(_dx) < .5 && Math.abs(_dy) < .5) {
       return;
     }
 
     isDrag = true;
+    onDragStart();
     onDrag(_dx, _dy);
   };
 
   DOMnode.onmousedown = function (ev) {
-    return onPressStart(ev, ev.offsetX, ev.offsetY);
+    return onPressStart(ev, ev.pageX, ev.pageY);
   };
   DOMnode.onmousemove = function (ev) {
-    return onPressDrag(ev, ev.offsetX, ev.offsetY);
+    return onPressDrag(ev, ev.pageX, ev.pageY);
   };
   DOMnode.onmouseup = function (ev) {
-    return onPressEnd(ev, ev.offsetX, ev.offsetY);
+    return onPressEnd(ev, ev.pageX, ev.pageY);
   };
   DOMnode.ontouchstart = function (ev) {
     return onPressStart(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
@@ -196,9 +211,6 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
   DOMnode.ontouchend = function (ev) {
     return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
-  DOMnode.ontouchleave = function (ev) {
-    return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
-  };
   DOMnode.ontouchcancel = function (ev) {
     return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
@@ -207,7 +219,19 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
   // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
-bindInputs(app, { onClick: onClick, onDrag: onDrag });
+var onDragStart = function onDragStart() {
+  if (root) {
+    root.className = 'root dragged';
+  }
+};
+var onDragEnd = function onDragEnd() {
+  if (root) {
+    root.className = 'root';
+  }
+};
+
+// bindInputs(app, {onClick, onDrag});
+bindInputs(app, { onClick: onClick, onDrag: onDrag, onDragStart: onDragStart, onDragEnd: onDragEnd });
 
 fetch('/likes/1').then(function (r) {
   return r.json();
