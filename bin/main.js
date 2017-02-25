@@ -111,14 +111,10 @@ app.put('/likes/:proj_id', _middleware.auth, (0, _middleware.action)(function (r
   return _db2.default.likes.getUser({ project_id: project_id, user_id: user_id }).then(function (result) {
     var likes = _lodash2.default.uniq(_lodash2.default.map(result, 'emoji'));
 
-    if (!_lodash2.default.includes(likes, emoji)) {
-      return _db2.default.likes.put({ project_id: project_id, user_id: user_id, emoji: emoji }).then(function () {
-        broadcastUpdate({ project_id: project_id, user_name: user_name, emoji: emoji });
-        res.send({ likes: _lodash2.default.concat(likes, emoji) });
-      });
-    }
-
-    res.send({ likes: likes });
+    return _db2.default.likes.put({ project_id: project_id, user_id: user_id, emoji: emoji }).then(function () {
+      broadcastUpdate({ project_id: project_id, user_name: user_name, emoji: emoji });
+      res.send({ likes: _lodash2.default.concat(likes, emoji) });
+    });
   });
 }));
 
