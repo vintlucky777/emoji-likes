@@ -77,12 +77,13 @@ const renderDOM = (elems) => {
 
     nameInput.value = user.name;
     if (!user.name) {
-      nameInput.setAttibute('class', 'name-input inviting');
+      nameInput.focus();
+      // nameInput.setAttibute('class', 'name-input inviting');
     }
     nameInput.onblur = (ev) => {
       const name = ev.target.value;
       const u = {...user, name};
-      nameInput.setAttibute('class', 'name-input');
+      // nameInput.setAttibute('class', 'name-input');
       saveUser(u);
     };
     // handle Enter

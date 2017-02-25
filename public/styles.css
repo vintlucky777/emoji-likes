@@ -36,7 +36,8 @@ input {
   transform: translateZ(10000px);
   z-index: 100000;
 }
-.name-input:focus {
+.name-input:focus,
+.name-input .invitinng {
   width: 90vw;
   top: 10vmin;
   opacity: 1;

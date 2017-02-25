@@ -81,7 +81,6 @@ var nameInput = null;
 var bottomlight = null;
 var renderDOM = function renderDOM(elems) {
   var tree = tag('.root', {}, elems);
-  // const overlay = tag('.overlay');
   var bl = tag('.bottomlight', {}, [tag('.reaction'), tag('.username')]);
 
   if (app) {
@@ -94,16 +93,21 @@ var renderDOM = function renderDOM(elems) {
     bottomlight = document.querySelector('.bottomlight');
 
     nameInput.value = user.name;
+    if (!user.name) {
+      nameInput.focus();
+      // nameInput.setAttibute('class', 'name-input inviting');
+    }
     nameInput.onblur = function (ev) {
       var name = ev.target.value;
       var u = _extends({}, user, { name: name });
+      // nameInput.setAttibute('class', 'name-input');
       saveUser(u);
     };
     // handle Enter
     nameInput.onkeydown = function (ev) {
       return ev.which === 13 ? nameInput.blur() : ev;
     };
-  }, 10);
+  }, 100);
 };
 
 var offset = { x: 0, y: 0 };
@@ -187,7 +191,6 @@ var animate = function animate() {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
     var _emojis = document.querySelectorAll('.bubble div');
-    // _.map(emojis, e => bindInputs(e, {onClick, onDrag}));
     _.map(_emojis, function (e) {
       return bindInputs(e, { onClick: onClick, onDrag: onDrag, onDragStart: onDragStart, onDragEnd: onDragEnd, onActualClick: function onActualClick() {
           return sendEmoji(e.getAttribute('title'));
@@ -283,9 +286,6 @@ var bindInputs = function bindInputs(DOMnode, _ref4) {
   DOMnode.ontouchcancel = function (ev) {
     return onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
   };
-  // DOMnode.onpointerdown = (ev) => onPressStart(ev, ev.offsetX, ev.offsetY);
-  // DOMnode.onpointermove = (ev) => onPressDrag(ev, ev.offsetX, ev.offsetX);
-  // DOMnode.onpointerup = (ev) => onPressEnd(ev, ev.offsetX, ev.offsetY);
 };
 
 var onDragStart = function onDragStart() {
@@ -299,7 +299,6 @@ var onDragEnd = function onDragEnd() {
   }
 };
 
-// bindInputs(app, {onClick, onDrag});
 bindInputs(app, { onClick: onClick, onDrag: onDrag, onDragStart: onDragStart, onDragEnd: onDragEnd });
 
 fetch('/likes/1').then(function (r) {
