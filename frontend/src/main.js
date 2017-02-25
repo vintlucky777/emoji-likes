@@ -53,15 +53,20 @@ const user = initUser();
 
 const app = document.querySelector('#app');
 let root = null;
+let bottomlight = null;
 const renderDOM = (elems) => {
   const tree = tag('.root', {}, elems);
-  const overlay = tag('.overlay');
+  // const overlay = tag('.overlay');
+  const bottomlay = tag('.bottomlight');
 
   if (app) {
-    app.innerHTML = tree + overlay;
+    app.innerHTML = tree + bottomlay;
   }
 
-  setTimeout(() => root = document.querySelector('.root'), 10);
+  setTimeout(() => {
+    root = document.querySelector('.root');
+    bottomlight = document.querySelector('.bottomlight');
+  }, 10);
 };
 
 const offset = {x: 0, y: 0};
@@ -166,6 +171,7 @@ const mesh = _.flatten(_.map(_.range(-4, 5), y => _.map(_.range(-4, 5), x => [x 
 const renderBubbles = () => {
   const elems = [
     ..._.map(mesh, ([x, y], i) => tag('.bubble', {style: `transform: translate3d(0)`}, [emojis[i]])),
+    tag('.overlay'),
   ];
   renderDOM(elems);
   emojify.setConfig({tag_type: 'div', mode: 'data-url'});
@@ -185,16 +191,29 @@ const effect = {
 //   ScaleToRadMult: .38,
 // };
 
+const flickBg = () => {
+  root.className = 'root success';
+  root.setAttribute('style', `background: rgb(${_.random(200)}, ${_.random(200)}, ${_.random(200)})`);
+  setTimeout(() => {
+    root.setAttribute('style', '');
+    root.className = 'root';
+  }, 100);
+}
+
+const flickBottom = () => {
+  bottomlight.className = 'bottomlight active';
+  bottomlight.setAttribute('style', `box-shadow: 0 0 50vmin 25vmin rgba(${_.random(200)}, ${_.random(200)}, ${_.random(200)}, 1)`);
+  setTimeout(() => {
+    bottomlight.setAttribute('style', '');
+    bottomlight.className = 'bottomlight';
+  }, 100);
+}
+
 const sendEmoji = (name) => {
   fetch('/likes/1', {method: 'PUT', headers: {'content-type': 'application/json', 'x-client-id': user.id}, body: `{"emoji":"${name.replace(/[^\w]/g, '')}"}`})
     .then(res => {
       if (res.status === 200 || res.status === 201) {
-        root.className = 'root success';
-        root.setAttribute('style', `background: rgb(${_.random(200)}, ${_.random(200)}, ${_.random(200)})`);
-        setTimeout(() => {
-          root.setAttribute('style', '');
-          root.className = 'root';
-        }, 100);
+        flickBg();
       }
     });
 };
@@ -313,6 +332,7 @@ fetch('/likes/1')
       }
 
       console.log(`${data.user_name}: :${data.emoji}:`);
+      flickBottom();
     };
 });
 

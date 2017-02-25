@@ -65,16 +65,19 @@ var user = initUser();
 
 var app = document.querySelector('#app');
 var root = null;
+var bottomlight = null;
 var renderDOM = function renderDOM(elems) {
   var tree = tag('.root', {}, elems);
-  var overlay = tag('.overlay');
+  // const overlay = tag('.overlay');
+  var bottomlay = tag('.bottomlight');
 
   if (app) {
-    app.innerHTML = tree + overlay;
+    app.innerHTML = tree + bottomlay;
   }
 
   setTimeout(function () {
-    return root = document.querySelector('.root');
+    root = document.querySelector('.root');
+    bottomlight = document.querySelector('.bottomlight');
   }, 10);
 };
 
@@ -104,7 +107,7 @@ var renderBubbles = function renderBubbles() {
         y = _ref2[1];
 
     return tag('.bubble', { style: 'transform: translate3d(0)' }, [emojis[i]]);
-  })));
+  })), [tag('.overlay')]);
   renderDOM(elems);
   emojify.setConfig({ tag_type: 'div', mode: 'data-url' });
   emojify.run();
@@ -123,15 +126,28 @@ var effect = {
 //   ScaleToRadMult: .38,
 // };
 
+var flickBg = function flickBg() {
+  root.className = 'root success';
+  root.setAttribute('style', 'background: rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
+  setTimeout(function () {
+    root.setAttribute('style', '');
+    root.className = 'root';
+  }, 100);
+};
+
+var flickBottom = function flickBottom() {
+  bottomlight.className = 'bottomlight active';
+  bottomlight.setAttribute('style', 'box-shadow: 0 0 50vmin 25vmin rgba(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ', 1)');
+  setTimeout(function () {
+    bottomlight.setAttribute('style', '');
+    bottomlight.className = 'bottomlight';
+  }, 100);
+};
+
 var sendEmoji = function sendEmoji(name) {
   fetch('/likes/1', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': user.id }, body: '{"emoji":"' + name.replace(/[^\w]/g, '') + '"}' }).then(function (res) {
     if (res.status === 200 || res.status === 201) {
-      root.className = 'root success';
-      root.setAttribute('style', 'background: rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
-      setTimeout(function () {
-        root.setAttribute('style', '');
-        root.className = 'root';
-      }, 100);
+      flickBg();
     }
   });
 };
@@ -273,6 +289,7 @@ fetch('/likes/1').then(function (r) {
     }
 
     console.log(data.user_name + ': :' + data.emoji + ':');
+    flickBottom();
   };
 });
 
