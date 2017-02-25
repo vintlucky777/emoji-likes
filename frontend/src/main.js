@@ -27,6 +27,10 @@ const tag = (_tagName, _args, children) => {
   return resultElem;
 };
 
+const bumpUser = (userObj) => {
+  fetch('/users', {method: 'PUT', headers: {'content-type': 'application/json', 'x-client-id': userObj.id}, body: `{"name":"${userObj.name}"}`})
+};
+
 const initUser = () => {
   let user_id = localStorage.getItem('user_id');
   let user_name = localStorage.getItem('user_name');;
@@ -45,14 +49,18 @@ const initUser = () => {
   return userObj;
 }
 
-const bumpUser = (userObj) => {
-  fetch('/users', {method: 'PUT', headers: {'content-type': 'application/json', 'x-client-id': userObj.id}, body: `{"name":"${userObj.name}"}`})
-};
-
 const user = initUser();
+
+const saveUser = ({id, name}) => {
+  const user = {...user, id, name};
+  localStorage.setItem('user_id', user.id);
+  localStorage.setItem('user_name', user.name);
+  bumpUser(user);
+};
 
 const app = document.querySelector('#app');
 let root = null;
+let nameInput = null;
 let bottomlight = null;
 const renderDOM = (elems) => {
   const tree = tag('.root', {}, elems);
@@ -64,8 +72,15 @@ const renderDOM = (elems) => {
   }
 
   setTimeout(() => {
+    nameInput = document.querySelector('.name-input');
     root = document.querySelector('.root');
     bottomlight = document.querySelector('.bottomlight');
+
+    nameInput.onblur = (ev) => {
+      const name = ev.target.value;
+      const u = {...user, name};
+      saveUser(u);
+    };
   }, 10);
 };
 
@@ -197,7 +212,7 @@ const flickBg = () => {
   setTimeout(() => {
     root.setAttribute('style', '');
     root.className = 'root';
-  }, 100);
+  }, 150);
 }
 
 const flickBottom = () => {
@@ -206,7 +221,7 @@ const flickBottom = () => {
   setTimeout(() => {
     bottomlight.setAttribute('style', '');
     bottomlight.className = 'bottomlight';
-  }, 100);
+  }, 150);
 }
 
 const setBottomEmoji = (reaction, username) => {

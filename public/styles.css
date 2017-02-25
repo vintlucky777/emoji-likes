@@ -17,6 +17,30 @@ body {
   justify-content: center;
   background: #000;
 }
+input {
+  font-size: 18pt;
+}
+.name-input {
+  position: fixed;
+  text-align: center;
+  width: 100%;
+  top: 0;
+  padding: .5em;
+  font-size: 18pt;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: .16em;
+  color: #fff;
+  transition: .3s;
+  opacity: .4;
+  transform: translateZ(10000px);
+  z-index: 100000;
+}
+.name-input:focus {
+  width: 90vw;
+  top: 10vmin;
+  opacity: 1;
+}
 #app {
   max-width: 40rem;
   max-height: 40rem;
@@ -66,7 +90,7 @@ body {
   height: 10vmin;
   border-radius: 50%;
   box-shadow: 0 0 50vmin 25vmin #ffffff;
-  transition: 0.5s;
+  transition: 0.7s;
   opacity: 0;
 }
 .bottomlight .reaction {

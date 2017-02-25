@@ -2,6 +2,8 @@
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
@@ -39,6 +41,10 @@ var tag = function tag(_tagName, _args, children) {
   return resultElem;
 };
 
+var bumpUser = function bumpUser(userObj) {
+  fetch('/users', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': userObj.id }, body: '{"name":"' + userObj.name + '"}' });
+};
+
 var initUser = function initUser() {
   var user_id = localStorage.getItem('user_id');
   var user_name = localStorage.getItem('user_name');;
@@ -57,14 +63,21 @@ var initUser = function initUser() {
   return userObj;
 };
 
-var bumpUser = function bumpUser(userObj) {
-  fetch('/users', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': userObj.id }, body: '{"name":"' + userObj.name + '"}' });
-};
-
 var user = initUser();
+
+var saveUser = function saveUser(_ref) {
+  var id = _ref.id,
+      name = _ref.name;
+
+  var user = _extends({}, user, { id: id, name: name });
+  localStorage.setItem('user_id', user.id);
+  localStorage.setItem('user_name', user.name);
+  bumpUser(user);
+};
 
 var app = document.querySelector('#app');
 var root = null;
+var nameInput = null;
 var bottomlight = null;
 var renderDOM = function renderDOM(elems) {
   var tree = tag('.root', {}, elems);
@@ -76,8 +89,15 @@ var renderDOM = function renderDOM(elems) {
   }
 
   setTimeout(function () {
+    nameInput = document.querySelector('.name-input');
     root = document.querySelector('.root');
     bottomlight = document.querySelector('.bottomlight');
+
+    nameInput.onblur = function (ev) {
+      var name = ev.target.value;
+      var u = _extends({}, user, { name: name });
+      saveUser(u);
+    };
   }, 10);
 };
 
@@ -101,10 +121,10 @@ var mesh = _.flatten(_.map(_.range(-4, 5), function (y) {
 }));
 
 var renderBubbles = function renderBubbles() {
-  var elems = [].concat(_toConsumableArray(_.map(mesh, function (_ref, i) {
-    var _ref2 = _slicedToArray(_ref, 2),
-        x = _ref2[0],
-        y = _ref2[1];
+  var elems = [].concat(_toConsumableArray(_.map(mesh, function (_ref2, i) {
+    var _ref3 = _slicedToArray(_ref2, 2),
+        x = _ref3[0],
+        y = _ref3[1];
 
     return tag('.bubble', { style: 'transform: translate3d(0)' }, [emojis[i]]);
   })), [tag('.overlay')]);
@@ -132,7 +152,7 @@ var flickBg = function flickBg() {
   setTimeout(function () {
     root.setAttribute('style', '');
     root.className = 'root';
-  }, 100);
+  }, 150);
 };
 
 var flickBottom = function flickBottom() {
@@ -141,7 +161,7 @@ var flickBottom = function flickBottom() {
   setTimeout(function () {
     bottomlight.setAttribute('style', '');
     bottomlight.className = 'bottomlight';
-  }, 100);
+  }, 150);
 };
 
 var setBottomEmoji = function setBottomEmoji(reaction, username) {
@@ -182,12 +202,12 @@ var animate = function animate() {
   isAnimating && requestAnimationFrame(animate);
 };
 
-var bindInputs = function bindInputs(DOMnode, _ref3) {
-  var onClick = _ref3.onClick,
-      onDrag = _ref3.onDrag,
-      onDragStart = _ref3.onDragStart,
-      onDragEnd = _ref3.onDragEnd,
-      onActualClick = _ref3.onActualClick;
+var bindInputs = function bindInputs(DOMnode, _ref4) {
+  var onClick = _ref4.onClick,
+      onDrag = _ref4.onDrag,
+      onDragStart = _ref4.onDragStart,
+      onDragEnd = _ref4.onDragEnd,
+      onActualClick = _ref4.onActualClick;
 
   // const bindInputs = (DOMnode, {onClick, onDrag}) => {
   var isPressed = false;
