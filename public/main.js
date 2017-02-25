@@ -51,7 +51,14 @@ var initUser = function initUser() {
     localStorage.setItem('user_name', user_name);
   }
 
-  return { id: user_id, name: user_name };
+  var userObj = { id: user_id, name: user_name };
+
+  bumpUser(userObj);
+  return userObj;
+};
+
+var bumpUser = function bumpUser(userObj) {
+  fetch('/users', { method: 'PUT', headers: { 'x-client-id': userObj.id }, body: '{"name":"' + userObj.name + '"}' });
 };
 
 var user = initUser();
@@ -77,9 +84,7 @@ var onDrag = function onDrag(rx, ry) {
   offset.x += rx * sensitivity;
   offset.y += ry * sensitivity;
 };
-var onClick = function onClick(x, y) {
-  console.log('onClick', { x: x, y: y });
-};
+var onClick = function onClick(x, y) {};
 
 // Prime-selected 80 emojis
 var emojis = [':thumbsup:', ':thumbsdown:', ':ok_hand:', ':punch:', ':fist:', ':v:', ':hand:', ':raised_hands:', ':pray:', ':heart:', ':clap:', ':muscle:', ':metal:', ':boom:', ':runner:', ':smile:', ':surfer:', ':laughing:', ':blush:', ':smiley:', ':relaxed:', ':smirk:', ':heart_eyes:', ':kissing_heart:', ':kissing_closed_eyes:', ':relieved:', ':tada:', ':grin:', ':wink:', ':stuck_out_tongue_winking_eye:', ':stuck_out_tongue_closed_eyes:', ':grinning:', ':kissing:', ':stuck_out_tongue:', ':sleeping:', ':worried:', ':frowning:', ':anguished:', ':open_mouth:', ':grimacing:', ':confused:', ':hushed:', ':expressionless:', ':unamused:', ':sweat_smile:', ':sweat:', ':disappointed_relieved:', ':weary:', ':pensive:', ':disappointed:', ':confounded:', ':cold_sweat:', ':persevere:', ':cry:', ':sob:', ':joy:', ':astonished:', ':scream:', ':neckbeard:', ':tired_face:', ':angry:', ':rage:', ':triumph:', ':sunglasses:', ':princess:', ':smiley_cat:', ':smile_cat:', ':heart_eyes_cat:', ':kissing_cat:', ':smirk_cat:', ':scream_cat:', ':crying_cat_face:', ':joy_cat:', ':pouting_cat:', ':see_no_evil:', ':hear_no_evil:', ':speak_no_evil:', ':guardsman:', ':skull:', ':feet:'];
@@ -118,13 +123,21 @@ var effect = {
 //   ScaleToRadMult: .38,
 // };
 
+var sendEmoji = function sendEmoji(name) {
+  fetch('/likes/1', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': user.id }, body: '{"emoji":"' + name.replace(/[^\w]/g, '') + '"}' }).then(function (res) {
+    return console.log('status', res.status);
+  });
+};
+
 var animate = function animate() {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
     var _emojis = document.querySelectorAll('.bubble div');
     // _.map(emojis, e => bindInputs(e, {onClick, onDrag}));
     _.map(_emojis, function (e) {
-      return bindInputs(e, { onClick: onClick, onDrag: onDrag, onDragStart: onDragStart, onDragEnd: onDragEnd });
+      return bindInputs(e, { onClick: onClick, onDrag: onDrag, onDragStart: onDragStart, onDragEnd: onDragEnd, onActualClick: function onActualClick() {
+          return sendEmoji(e.getAttribute('title'));
+        } });
     });
   }
 
@@ -144,7 +157,8 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
   var onClick = _ref3.onClick,
       onDrag = _ref3.onDrag,
       onDragStart = _ref3.onDragStart,
-      onDragEnd = _ref3.onDragEnd;
+      onDragEnd = _ref3.onDragEnd,
+      onActualClick = _ref3.onActualClick;
 
   // const bindInputs = (DOMnode, {onClick, onDrag}) => {
   var isPressed = false;
@@ -163,6 +177,7 @@ var bindInputs = function bindInputs(DOMnode, _ref3) {
     ev.preventDefault();
     if (!isDrag && Date.now() - pressStart < 400) {
       onClick(cx, cy);
+      onActualClick && onActualClick();
     }
 
     isPressed = false;

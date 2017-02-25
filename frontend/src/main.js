@@ -39,8 +39,15 @@ const initUser = () => {
     localStorage.setItem('user_name', user_name);
   }
 
-  return {id: user_id, name: user_name};
+  const userObj = {id: user_id, name: user_name};
+
+  bumpUser(userObj);
+  return userObj;
 }
+
+const bumpUser = (userObj) => {
+  fetch('/users', {method: 'PUT', headers: {'x-client-id': userObj.id}, body: `{"name":"${userObj.name}"}`})
+};
 
 const user = initUser();
 
@@ -64,7 +71,7 @@ const onDrag = (rx, ry) => {
   offset.y += ry * sensitivity;
 };
 const onClick = (x, y) => {
-  console.log('onClick', {x, y});
+
 };
 
 
@@ -179,12 +186,17 @@ const effect = {
 //   ScaleToRadMult: .38,
 // };
 
+const sendEmoji = (name) => {
+  fetch('/likes/1', {method: 'PUT', headers: {'content-type': 'application/json', 'x-client-id': user.id}, body: `{"emoji":"${name.replace(/[^\w]/g, '')}"}`})
+    .then(res => console.log('status', res.status))
+};
+
 const animate = () => {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
     const emojis = document.querySelectorAll('.bubble div');
     // _.map(emojis, e => bindInputs(e, {onClick, onDrag}));
-    _.map(emojis, e => bindInputs(e, {onClick, onDrag, onDragStart, onDragEnd}));
+    _.map(emojis, e => bindInputs(e, {onClick, onDrag, onDragStart, onDragEnd, onActualClick: () => sendEmoji(e.getAttribute('title'))}));
   }
 
   _.map(bubbles, (b, i) => {
@@ -200,7 +212,7 @@ const animate = () => {
   isAnimating && requestAnimationFrame(animate);
 };
 
-const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd}) => {
+const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd, onActualClick}) => {
 // const bindInputs = (DOMnode, {onClick, onDrag}) => {
   let isPressed = false;
   let pressStart = null;
@@ -218,6 +230,7 @@ const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd}) => {
     ev.preventDefault();
     if (!isDrag && Date.now() - pressStart < 400) {
       onClick(cx, cy);
+      onActualClick && onActualClick();
     }
 
     isPressed = false;

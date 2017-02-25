@@ -61,6 +61,7 @@ app.put('/likes/:proj_id', auth, action((req, res) => {
   }
 
   const emoji = _.get(req.body, 'emoji');
+  console.log({emoji})
 
   if (!isEmoji(emoji)) {
     res.status(400).json({'bad_argument': 'emoji'});
