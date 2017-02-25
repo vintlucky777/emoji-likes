@@ -81,6 +81,8 @@ const renderDOM = (elems) => {
       const u = {...user, name};
       saveUser(u);
     };
+    // handle Enter
+    nameInput.onkeydown = (ev) => ev.which === 13 ? nameInput.blur() : ev;
   }, 10);
 };
 
