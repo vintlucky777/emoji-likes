@@ -76,6 +76,9 @@ var onClick = function onClick(x, y) {
   console.log('onClick', { x: x, y: y });
 };
 
+// Prime-selected 80 emojis
+var emojis = [':thumbsup:', ':thumbsdown:', ':ok_hand:', ':punch:', ':fist:', ':v:', ':hand:', ':raised_hands:', ':pray:', ':heart:', ':clap:', ':muscle:', ':metal:', ':boom:', ':runner:', ':smile:', ':surfer:', ':laughing:', ':blush:', ':smiley:', ':relaxed:', ':smirk:', ':heart_eyes:', ':kissing_heart:', ':kissing_closed_eyes:', ':relieved:', ':tada:', ':grin:', ':wink:', ':stuck_out_tongue_winking_eye:', ':stuck_out_tongue_closed_eyes:', ':grinning:', ':kissing:', ':stuck_out_tongue:', ':sleeping:', ':worried:', ':frowning:', ':anguished:', ':open_mouth:', ':grimacing:', ':confused:', ':hushed:', ':expressionless:', ':unamused:', ':sweat_smile:', ':sweat:', ':disappointed_relieved:', ':weary:', ':pensive:', ':disappointed:', ':confounded:', ':cold_sweat:', ':persevere:', ':cry:', ':sob:', ':joy:', ':astonished:', ':scream:', ':neckbeard:', ':tired_face:', ':angry:', ':rage:', ':triumph:', ':sunglasses:', ':princess:', ':smiley_cat:', ':smile_cat:', ':heart_eyes_cat:', ':kissing_cat:', ':smirk_cat:', ':scream_cat:', ':crying_cat_face:', ':joy_cat:', ':pouting_cat:', ':see_no_evil:', ':hear_no_evil:', ':speak_no_evil:', ':guardsman:', ':skull:', ':feet:'];
+
 var isAnimating = true;
 var bubbles = null;
 var mesh = _.flatten(_.map(_.range(-4, 5), function (y) {
@@ -85,18 +88,20 @@ var mesh = _.flatten(_.map(_.range(-4, 5), function (y) {
 }));
 
 var renderBubbles = function renderBubbles() {
-  var elems = _.map(mesh, function (_ref, i) {
+  var elems = [tag('h2.title', {}, ['re-frame-a-to-z'])].concat(_toConsumableArray(_.map(mesh, function (_ref, i) {
     var _ref2 = _slicedToArray(_ref, 2),
         x = _ref2[0],
         y = _ref2[1];
 
-    return tag('.bubble', { style: 'transform: translate3d(0)' }, ['' + i]);
-  });
+    return tag('.bubble', { style: 'transform: translate3d(0)' }, [emojis[i]]);
+  })));
   renderDOM(elems);
+  emojify.setConfig({ tag: 'div', mode: 'data-url' });
+  emojify.run();
 };
 
 var effect = {
-  BrokeInv: 1.8,
+  BrokeInv: 1.7,
   RadiusInv: .29,
   Scale: 1.5,
   ScaleToRadMult: .38
@@ -107,6 +112,7 @@ var effect = {
 //   Scale: 1.7,
 //   ScaleToRadMult: .38,
 // };
+
 var animate = function animate() {
   if (!bubbles) {
     bubbles = document.querySelectorAll('.bubble');
@@ -118,7 +124,7 @@ var animate = function animate() {
     var r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effect.RadiusInv;
     var R = Math.max(0, Math.min(effect.Scale - (effect.Scale - 1) * effect.BrokeInv * r, (1 - r) * effect.BrokeInv / (effect.BrokeInv - 1)));
     var r_mult = 1 + R * effect.ScaleToRadMult;
-    b.setAttribute('style', '      transform: translate3d(' + 110 * pos_x * r_mult + '%, ' + 110 * pos_y * r_mult + '%, ' + 100 * R + 'px) scale3d(' + R + ', ' + R + ', 1)');
+    b.setAttribute('style', 'transform: translate3d(' + 110 * pos_x * r_mult + '%, ' + 110 * pos_y * r_mult + '%, ' + 100 * R + 'px) scale3d(' + R + ', ' + R + ', 1)');
   });
 
   isAnimating && requestAnimationFrame(animate);
