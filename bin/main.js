@@ -99,6 +99,7 @@ app.put('/likes/:proj_id', _middleware.auth, (0, _middleware.action)(function (r
   }
 
   var emoji = _lodash2.default.get(req.body, 'emoji');
+  console.log({ emoji: emoji });
 
   if (!(0, _utils.isEmoji)(emoji)) {
     res.status(400).json({ 'bad_argument': 'emoji' });
