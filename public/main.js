@@ -98,6 +98,10 @@ var renderDOM = function renderDOM(elems) {
       var u = _extends({}, user, { name: name });
       saveUser(u);
     };
+    // handle Enter
+    nameInput.onkeydown = function (ev) {
+      return ev.which === 13 ? nameInput.blur() : ev;
+    };
   }, 10);
 };
 
