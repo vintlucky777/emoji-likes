@@ -129,7 +129,7 @@ var sendEmoji = function sendEmoji(name) {
       root.className = 'root success';
       root.setAttribute('style', 'background: rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
       setTimeout(function () {
-        root.setAttribute('style', 'null');
+        root.setAttribute('style', '');
         root.className = 'root';
       }, 100);
     }
