@@ -41,6 +41,11 @@ body {
   height: 100%;
   user-select: none;
   cursor: pointer;
+  transition: .5s;
+}
+.root.success {
+  background-color: #8E4055;
+  transition: none;
 }
 .overlay {
   pointer-events: none;

@@ -165,7 +165,6 @@ const mesh = _.flatten(_.map(_.range(-4, 5), y => _.map(_.range(-4, 5), x => [x 
 
 const renderBubbles = () => {
   const elems = [
-    tag('h2.title', {}, ['re-frame-a-to-z']),
     ..._.map(mesh, ([x, y], i) => tag('.bubble', {style: `transform: translate3d(0)`}, [emojis[i]])),
   ];
   renderDOM(elems);
@@ -188,7 +187,16 @@ const effect = {
 
 const sendEmoji = (name) => {
   fetch('/likes/1', {method: 'PUT', headers: {'content-type': 'application/json', 'x-client-id': user.id}, body: `{"emoji":"${name.replace(/[^\w]/g, '')}"}`})
-    .then(res => console.log('status', res.status))
+    .then(res => {
+      if (res.status === 200 || res.status === 201) {
+        root.className = 'root success';
+        root.setAttribute('style', `background: rgb(${_.random(200)}, ${_.random(200)}, ${_.random(200)})`);
+        setTimeout(() => {
+          root.setAttribute('style', '');
+          root.className = 'root';
+        }, 100);
+      }
+    });
 };
 
 const animate = () => {

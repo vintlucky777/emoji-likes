@@ -98,7 +98,7 @@ var mesh = _.flatten(_.map(_.range(-4, 5), function (y) {
 }));
 
 var renderBubbles = function renderBubbles() {
-  var elems = [tag('h2.title', {}, ['re-frame-a-to-z'])].concat(_toConsumableArray(_.map(mesh, function (_ref, i) {
+  var elems = [].concat(_toConsumableArray(_.map(mesh, function (_ref, i) {
     var _ref2 = _slicedToArray(_ref, 2),
         x = _ref2[0],
         y = _ref2[1];
@@ -125,7 +125,14 @@ var effect = {
 
 var sendEmoji = function sendEmoji(name) {
   fetch('/likes/1', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': user.id }, body: '{"emoji":"' + name.replace(/[^\w]/g, '') + '"}' }).then(function (res) {
-    return console.log('status', res.status);
+    if (res.status === 200 || res.status === 201) {
+      root.className = 'root success';
+      root.setAttribute('style', 'background: rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
+      setTimeout(function () {
+        root.setAttribute('style', 'null');
+        root.className = 'root';
+      }, 100);
+    }
   });
 };
 
