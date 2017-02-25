@@ -46,7 +46,7 @@ const initUser = () => {
 }
 
 const bumpUser = (userObj) => {
-  fetch('/users', {method: 'PUT', headers: {'x-client-id': userObj.id}, body: `{"name":"${userObj.name}"}`})
+  fetch('/users', {method: 'PUT', headers: {'content-type': 'application/json', 'x-client-id': userObj.id}, body: `{"name":"${userObj.name}"}`})
 };
 
 const user = initUser();
@@ -57,10 +57,10 @@ let bottomlight = null;
 const renderDOM = (elems) => {
   const tree = tag('.root', {}, elems);
   // const overlay = tag('.overlay');
-  const bottomlay = tag('.bottomlight');
+  const bl = tag('.bottomlight', {}, [tag('.reaction'), tag('.username')]);
 
   if (app) {
-    app.innerHTML = tree + bottomlay;
+    app.innerHTML = tree + bl;
   }
 
   setTimeout(() => {
@@ -202,11 +202,17 @@ const flickBg = () => {
 
 const flickBottom = () => {
   bottomlight.className = 'bottomlight active';
-  bottomlight.setAttribute('style', `box-shadow: 0 0 50vmin 25vmin rgba(${_.random(200)}, ${_.random(200)}, ${_.random(200)}, 1)`);
+  bottomlight.setAttribute('style', `box-shadow: 0 0 50vmin 25vmin rgb(${_.random(200)}, ${_.random(200)}, ${_.random(200)})`);
   setTimeout(() => {
     bottomlight.setAttribute('style', '');
     bottomlight.className = 'bottomlight';
   }, 100);
+}
+
+const setBottomEmoji = (reaction, username) => {
+  bottomlight.querySelector('.reaction').innerHTML = `:${reaction}:`;
+  bottomlight.querySelector('.username').innerHTML = username;
+  emojify.run(bottomlight.querySelector('.reaction'));
 }
 
 const sendEmoji = (name) => {
@@ -332,6 +338,7 @@ fetch('/likes/1')
       }
 
       console.log(`${data.user_name}: :${data.emoji}:`);
+      setBottomEmoji(data.emoji, data.user_name);
       flickBottom();
     };
 });

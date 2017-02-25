@@ -62,16 +62,34 @@ body {
 
 .bottomlight {
   pointer-events: none;
+  transform: translateZ(0);
   position: absolute;
   bottom: -10vmin;
   width: 50vmin;
   height: 10vmin;
   border-radius: 50%;
-  box-shadow: 0 0 50vmin 25vmin rgba(255, 255, 255, 0);
+  box-shadow: 0 0 50vmin 25vmin rgb(255, 255, 255);
   transition: 0.5s;
+  opacity: 0;
+
+  .reaction {
+    margin-top: -25vmin;
+    margin-bottom: .34em;
+    text-align: center;
+    font-size: 2em;
+  }
+  .username {
+    color: #fff;
+    text-shadow: 0 0 2px #000;
+    font-family: arial;
+    font-weight: 100;
+    font-size: 80%;
+    text-align: center;
+  }
 }
 
 .bottomlight.active {
+  opacity: 1;
   transition: none;
 }
 

@@ -58,7 +58,7 @@ var initUser = function initUser() {
 };
 
 var bumpUser = function bumpUser(userObj) {
-  fetch('/users', { method: 'PUT', headers: { 'x-client-id': userObj.id }, body: '{"name":"' + userObj.name + '"}' });
+  fetch('/users', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': userObj.id }, body: '{"name":"' + userObj.name + '"}' });
 };
 
 var user = initUser();
@@ -69,10 +69,10 @@ var bottomlight = null;
 var renderDOM = function renderDOM(elems) {
   var tree = tag('.root', {}, elems);
   // const overlay = tag('.overlay');
-  var bottomlay = tag('.bottomlight');
+  var bl = tag('.bottomlight', {}, [tag('.reaction'), tag('.username')]);
 
   if (app) {
-    app.innerHTML = tree + bottomlay;
+    app.innerHTML = tree + bl;
   }
 
   setTimeout(function () {
@@ -137,11 +137,17 @@ var flickBg = function flickBg() {
 
 var flickBottom = function flickBottom() {
   bottomlight.className = 'bottomlight active';
-  bottomlight.setAttribute('style', 'box-shadow: 0 0 50vmin 25vmin rgba(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ', 1)');
+  bottomlight.setAttribute('style', 'box-shadow: 0 0 50vmin 25vmin rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
   setTimeout(function () {
     bottomlight.setAttribute('style', '');
     bottomlight.className = 'bottomlight';
   }, 100);
+};
+
+var setBottomEmoji = function setBottomEmoji(reaction, username) {
+  bottomlight.querySelector('.reaction').innerHTML = ':' + reaction + ':';
+  bottomlight.querySelector('.username').innerHTML = username;
+  emojify.run(bottomlight.querySelector('.reaction'));
 };
 
 var sendEmoji = function sendEmoji(name) {
@@ -289,6 +295,7 @@ fetch('/likes/1').then(function (r) {
     }
 
     console.log(data.user_name + ': :' + data.emoji + ':');
+    setBottomEmoji(data.emoji, data.user_name);
     flickBottom();
   };
 });
