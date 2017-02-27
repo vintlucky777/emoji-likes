@@ -27,6 +27,9 @@ const tag = (_tagName, _args, children) => {
   return resultElem;
 };
 
+const delay = (time, fn) => new Promise((res) => setTimeout(() => res(fn()), time));
+const round = (val, precision) => Math.round(val * Math.pow(10, precision)) / Math.pow(10, precision);
+
 const bumpUser = (userObj) => {
   fetch('/users', {method: 'PUT', headers: {'content-type': 'application/json', 'x-client-id': userObj.id}, body: `{"name":"${userObj.name}"}`})
 };
@@ -70,7 +73,7 @@ const renderDOM = (elems) => {
     app.innerHTML = tree + bl;
   }
 
-  setTimeout(() => {
+  delay(100, () => {
     nameInput = document.querySelector('.name-input');
     root = document.querySelector('.root');
     bottomlight = document.querySelector('.bottomlight');
@@ -88,17 +91,7 @@ const renderDOM = (elems) => {
     };
     // handle Enter
     nameInput.onkeydown = (ev) => ev.which === 13 ? nameInput.blur() : ev;
-  }, 100);
-};
-
-const offset = {x: 0, y: 0};
-const onDrag = (rx, ry) => {
-  const sensitivity = 0.07;
-  offset.x += rx * sensitivity;
-  offset.y += ry * sensitivity;
-};
-const onClick = (x, y) => {
-
+  });
 };
 
 
@@ -192,7 +185,7 @@ const mesh = _.flatten(_.map(_.range(-4, 5), y => _.map(_.range(-4, 5), x => [x 
 
 const renderBubbles = () => {
   const elems = [
-    ..._.map(mesh, ([x, y], i) => tag('.bubble', {style: `transform: translate3d(0)`}, [emojis[i]])),
+    ..._.map(mesh, ([x, y], i) => tag('.bubble', {style: `transform: translate3d(${105 * x}%, ${105 * y}%, 0)`}, [emojis[i]])),
     tag('.overlay'),
   ];
   renderDOM(elems);
@@ -201,34 +194,53 @@ const renderBubbles = () => {
 }
 
 const effect = {
-  BrokeInv: 1.7,
-  RadiusInv: .29,
-  Scale: 1.5,
-  ScaleToRadMult: .38,
+  RadiusInv: 1 / 280,
+  Broke: 0.8,
+  Scale: 1.15,
 };
-// const effect = {
-//   BrokeInv: 1.56,
-//   RadiusInv: .26,
-//   Scale: 1.7,
-//   ScaleToRadMult: .38,
-// };
+
+const animate = () => {
+  if (!bubbles) {
+    bubbles = document.querySelectorAll('.bubble');
+    const emojis = document.querySelectorAll('.bubble div');
+    _.map(emojis, e => bindInputs(e, {onClick, onDrag, onDragStart, onDragEnd, onActualClick: () => sendEmoji(e.getAttribute('title'))}));
+  }
+
+  _.map(bubbles, (b, i) => {
+    const pos_x = 105 * (mesh[i][0] + offset.x);
+    const pos_y = 105 * (mesh[i][1] + offset.y);
+    const r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effect.RadiusInv;
+    const R = Math.max(0, Math.min((1 - r)/(1 - effect.Broke), effect.Scale - r * (effect.Scale - 1) / effect.Broke));
+    let r_mult = 1;
+    if (r === 0) {
+      r_mult = 0;
+    } else if (r > effect.Broke) {
+      r_mult =  (r*.5 + .4) / r;
+    }
+    const x = round(pos_x * r_mult, 2);
+    const y = round(pos_y * r_mult, 2);
+    b.setAttribute('style', `transform: translate3d(${x}%, ${y}%, ${10 * R}px) scale3d(${R}, ${R}, 1)`);
+  })
+
+  isAnimating && requestAnimationFrame(animate);
+};
 
 const flickBg = () => {
   root.className = 'root success';
   root.setAttribute('style', `background: rgb(${_.random(200)}, ${_.random(200)}, ${_.random(200)})`);
-  setTimeout(() => {
+  delay(150, () => {
     root.setAttribute('style', '');
     root.className = 'root';
-  }, 150);
+  });
 }
 
 const flickBottom = () => {
   bottomlight.className = 'bottomlight active';
   bottomlight.setAttribute('style', `box-shadow: 0 0 50vmin 25vmin rgb(${_.random(200)}, ${_.random(200)}, ${_.random(200)})`);
-  setTimeout(() => {
+  delay(150, () => {
     bottomlight.setAttribute('style', '');
     bottomlight.className = 'bottomlight';
-  }, 150);
+  });
 }
 
 const setBottomEmoji = (reaction, username) => {
@@ -244,26 +256,6 @@ const sendEmoji = (name) => {
         flickBg();
       }
     });
-};
-
-const animate = () => {
-  if (!bubbles) {
-    bubbles = document.querySelectorAll('.bubble');
-    const emojis = document.querySelectorAll('.bubble div');
-    _.map(emojis, e => bindInputs(e, {onClick, onDrag, onDragStart, onDragEnd, onActualClick: () => sendEmoji(e.getAttribute('title'))}));
-  }
-
-  _.map(bubbles, (b, i) => {
-    const pos_x = mesh[i][0] + offset.x;
-    const pos_y = mesh[i][1] + offset.y;
-    const r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effect.RadiusInv;
-    const R = Math.max(0, Math.min(effect.Scale - (effect.Scale - 1) * effect.BrokeInv * r,
-                                   (1 - r) * effect.BrokeInv / (effect.BrokeInv - 1)));
-    const r_mult = 1 + R * effect.ScaleToRadMult;
-    b.setAttribute('style', `transform: translate3d(${110 * pos_x * r_mult}%, ${110 * pos_y * r_mult}%, ${100*R}px) scale3d(${R}, ${R}, 1)`);
-  })
-
-  isAnimating && requestAnimationFrame(animate);
 };
 
 const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd, onActualClick}) => {
@@ -306,7 +298,7 @@ const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd, onActualC
     cursor.x = cx;
     cursor.y = cy;
 
-    if (!isDrag && Math.abs(_dx) < .5 && Math.abs(_dy) < .5) {
+    if (!isDrag && Math.abs(_dx) < .3 && Math.abs(_dy) < .3) {
       return;
     }
 
@@ -324,6 +316,16 @@ const bindInputs = (DOMnode, {onClick, onDrag, onDragStart, onDragEnd, onActualC
   DOMnode.ontouchcancel = (ev) => onPressEnd(ev, ev.changedTouches[0].pageX, ev.changedTouches[0].pageY);
 };
 
+const offset = {x: 0, y: 0};
+const onDrag = (rx, ry) => {
+  const sensitivity = 0.05;
+  offset.x += rx * sensitivity;
+  offset.y += ry * sensitivity;
+};
+const onClick = (x, y) => {
+
+};
+
 const onDragStart = () => {
   if (root) {
     root.className = 'root dragged';
@@ -337,6 +339,36 @@ const onDragEnd = () => {
 
 bindInputs(app, {onClick, onDrag, onDragStart, onDragEnd});
 
+const websocket = (url, {reconnect, onOpen, onMessage, onClose, onError}) => {
+  const ref = {ws: new WebSocket(url)};
+  const retryDelay = 1000;
+  const setupWS = (ws) => {
+    ws.onopen = (...args) => {
+      console.log(`${url}: connected`);
+      onOpen && onOpen(...args);
+    };
+    ws.onclose = (...args) => {
+      console.log(`${url}: disconnected`);
+      onClose && onClose(...args);
+      reconnect && recon();
+    };
+    ws.onerror = (...args) => onError && onError(...args);
+    ws.onmessage = (...args) => onMessage && onMessage(...args);
+  }
+
+  const recon = () => {
+    console.log(`will retry in ${retryDelay}`);
+    delay(retryDelay, () => {
+      ref.ws = new WebSocket(url);
+      setupWS(ref.ws);
+    });
+  };
+
+  setupWS(ref.ws);
+
+  return ref;
+};
+
 fetch('/likes/1')
   .then(r => r.json())
   .then(resp => {
@@ -344,9 +376,8 @@ fetch('/likes/1')
 
     const proto = location.protocol;
     const wsProto = proto === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${wsProto}://${location.host}/`);
-
-    ws.onmessage = (ev) => {
+    const wsUrl = `${wsProto}://${location.host}/`;
+    const onMessage = (ev) => {
       let data = null;
       try {
         data = JSON.parse(ev.data);
@@ -358,6 +389,8 @@ fetch('/likes/1')
       setBottomEmoji(data.emoji, data.user_name);
       flickBottom();
     };
+
+    const ws = websocket(wsUrl, {reconnect: true, onMessage});
 });
 
 renderBubbles();

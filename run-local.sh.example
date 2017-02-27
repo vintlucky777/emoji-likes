@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DB_URL="postgres@localhost:5432"
+
+DATABASE_URL=$DB_URL npm start

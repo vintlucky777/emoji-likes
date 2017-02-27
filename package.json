@@ -5,10 +5,11 @@
   "main": "src/main.js",
   "scripts": {
     "babel-node": "babel-node",
-    "start": "nodemon --exec npm run babel-node -- src/main.js",
+    "start": "nodemon --ignore 'target/*' --ignore 'public/*' --ignore 'frontend/*' --exec npm run boot-server",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-server": "babel src -d bin",
-    "build-fe": "babel frontend/src -d public && lessc frontend/less/main.less public/styles.css"
+    "build-server": "babel src -d target",
+    "build-fe": "cpx frontend/index.html public && babel frontend/src -d public && lessc frontend/less/main.less public/styles.css",
+    "boot-server": "npm run build-server && npm run build-fe && npm run babel-node -- target/main.js"
   },
   "author": "Victor Klochikhin",
   "license": "MIT",
@@ -31,6 +32,7 @@
     "babel-core": "6.23.1",
     "babel-preset-latest": "6.22.0",
     "babel-preset-stage-0": "6.22.0",
+    "cpx": "^1.5.0",
     "emojify.js": "^1.1.0",
     "nodemon": "1.11.0",
     "whatwg-fetch": "2.0.2"

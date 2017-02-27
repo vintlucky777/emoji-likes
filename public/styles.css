@@ -86,9 +86,9 @@ input {
   pointer-events: none;
   transform: translateZ(0);
   position: absolute;
-  bottom: -10vmin;
+  bottom: -10vh;
   width: 50vmin;
-  height: 10vmin;
+  height: 10vh;
   border-radius: 50%;
   box-shadow: 0 0 50vmin 25vmin #ffffff;
   transition: 0.7s;
@@ -121,10 +121,10 @@ input {
   position: absolute;
   left: 50%;
   top: 50%;
-  margin-left: -5vmin;
-  margin-top: -5vmin;
-  width: 10vmin;
-  height: 10vmin;
+  margin-left: -1.2em;
+  margin-top: -1.2em;
+  width: 2.4em;
+  height: 2.4em;
   transition: transform 120ms ease-out;
 }
 .bubble .emoji {

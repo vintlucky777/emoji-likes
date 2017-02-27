@@ -41,6 +41,17 @@ var tag = function tag(_tagName, _args, children) {
   return resultElem;
 };
 
+var delay = function delay(time, fn) {
+  return new Promise(function (res) {
+    return setTimeout(function () {
+      return res(fn());
+    }, time);
+  });
+};
+var round = function round(val, precision) {
+  return Math.round(val * Math.pow(10, precision)) / Math.pow(10, precision);
+};
+
 var bumpUser = function bumpUser(userObj) {
   fetch('/users', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': userObj.id }, body: '{"name":"' + userObj.name + '"}' });
 };
@@ -87,7 +98,7 @@ var renderDOM = function renderDOM(elems) {
     app.innerHTML = tree + bl;
   }
 
-  setTimeout(function () {
+  delay(100, function () {
     nameInput = document.querySelector('.name-input');
     root = document.querySelector('.root');
     bottomlight = document.querySelector('.bottomlight');
@@ -107,16 +118,8 @@ var renderDOM = function renderDOM(elems) {
     nameInput.onkeydown = function (ev) {
       return ev.which === 13 ? nameInput.blur() : ev;
     };
-  }, 100);
+  });
 };
-
-var offset = { x: 0, y: 0 };
-var onDrag = function onDrag(rx, ry) {
-  var sensitivity = 0.07;
-  offset.x += rx * sensitivity;
-  offset.y += ry * sensitivity;
-};
-var onClick = function onClick(x, y) {};
 
 // Prime-selected 80 emojis
 var emojis = [':thumbsup:', ':thumbsdown:', ':ok_hand:', ':punch:', ':fist:', ':v:', ':hand:', ':raised_hands:', ':pray:', ':heart:', ':clap:', ':muscle:', ':weary:', ':kissing:', ':runner:', ':smile:', ':surfer:', ':laughing:', ':blush:', ':smiley:', ':relaxed:', ':confused:', ':heart_eyes:', ':kissing_heart:', ':kissing_closed_eyes:', ':relieved:', ':open_mouth:', ':grin:', ':wink:', ':stuck_out_tongue_winking_eye:', ':stuck_out_tongue_closed_eyes:', ':grinning:', ':boom:', ':stuck_out_tongue:', ':sleeping:', ':worried:', ':frowning:', ':anguished:', ':tada:', ':grimacing:', ':smirk:', ':joy:', ':expressionless:', ':unamused:', ':sweat_smile:', ':sweat:', ':disappointed_relieved:', ':metal:', ':scream:', ':neckbeard:', ':confounded:', ':cold_sweat:', ':persevere:', ':cry:', ':sob:', ':hushed:', ':astonished:', ':disappointed:', ':pensive:', ':tired_face:', ':angry:', ':rage:', ':triumph:', ':sunglasses:', ':princess:', ':smiley_cat:', ':smile_cat:', ':heart_eyes_cat:', ':kissing_cat:', ':smirk_cat:', ':scream_cat:', ':crying_cat_face:', ':joy_cat:', ':pouting_cat:', ':see_no_evil:', ':hear_no_evil:', ':speak_no_evil:', ':guardsman:', ':skull:', ':feet:'];
@@ -135,7 +138,7 @@ var renderBubbles = function renderBubbles() {
         x = _ref3[0],
         y = _ref3[1];
 
-    return tag('.bubble', { style: 'transform: translate3d(0)' }, [emojis[i]]);
+    return tag('.bubble', { style: 'transform: translate3d(' + 105 * x + '%, ' + 105 * y + '%, 0)' }, [emojis[i]]);
   })), [tag('.overlay')]);
   renderDOM(elems);
   emojify.setConfig({ tag_type: 'div', mode: 'data-url' });
@@ -143,48 +146,9 @@ var renderBubbles = function renderBubbles() {
 };
 
 var effect = {
-  BrokeInv: 1.7,
-  RadiusInv: .29,
-  Scale: 1.5,
-  ScaleToRadMult: .38
-};
-// const effect = {
-//   BrokeInv: 1.56,
-//   RadiusInv: .26,
-//   Scale: 1.7,
-//   ScaleToRadMult: .38,
-// };
-
-var flickBg = function flickBg() {
-  root.className = 'root success';
-  root.setAttribute('style', 'background: rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
-  setTimeout(function () {
-    root.setAttribute('style', '');
-    root.className = 'root';
-  }, 150);
-};
-
-var flickBottom = function flickBottom() {
-  bottomlight.className = 'bottomlight active';
-  bottomlight.setAttribute('style', 'box-shadow: 0 0 50vmin 25vmin rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
-  setTimeout(function () {
-    bottomlight.setAttribute('style', '');
-    bottomlight.className = 'bottomlight';
-  }, 150);
-};
-
-var setBottomEmoji = function setBottomEmoji(reaction, username) {
-  bottomlight.querySelector('.reaction').innerHTML = ':' + reaction + ':';
-  bottomlight.querySelector('.username').innerHTML = username;
-  emojify.run(bottomlight.querySelector('.reaction'));
-};
-
-var sendEmoji = function sendEmoji(name) {
-  fetch('/likes/1', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': user.id }, body: '{"emoji":"' + name.replace(/[^\w]/g, '') + '"}' }).then(function (res) {
-    if (res.status === 200 || res.status === 201) {
-      flickBg();
-    }
-  });
+  RadiusInv: 1 / 280,
+  Broke: 0.8,
+  Scale: 1.15
 };
 
 var animate = function animate() {
@@ -199,15 +163,54 @@ var animate = function animate() {
   }
 
   _.map(bubbles, function (b, i) {
-    var pos_x = mesh[i][0] + offset.x;
-    var pos_y = mesh[i][1] + offset.y;
+    var pos_x = 105 * (mesh[i][0] + offset.x);
+    var pos_y = 105 * (mesh[i][1] + offset.y);
     var r = Math.sqrt(pos_x * pos_x + pos_y * pos_y) * effect.RadiusInv;
-    var R = Math.max(0, Math.min(effect.Scale - (effect.Scale - 1) * effect.BrokeInv * r, (1 - r) * effect.BrokeInv / (effect.BrokeInv - 1)));
-    var r_mult = 1 + R * effect.ScaleToRadMult;
-    b.setAttribute('style', 'transform: translate3d(' + 110 * pos_x * r_mult + '%, ' + 110 * pos_y * r_mult + '%, ' + 100 * R + 'px) scale3d(' + R + ', ' + R + ', 1)');
+    var R = Math.max(0, Math.min((1 - r) / (1 - effect.Broke), effect.Scale - r * (effect.Scale - 1) / effect.Broke));
+    var r_mult = 1;
+    if (r === 0) {
+      r_mult = 0;
+    } else if (r > effect.Broke) {
+      r_mult = (r * .5 + .4) / r;
+    }
+    var x = round(pos_x * r_mult, 2);
+    var y = round(pos_y * r_mult, 2);
+    b.setAttribute('style', 'transform: translate3d(' + x + '%, ' + y + '%, ' + 10 * R + 'px) scale3d(' + R + ', ' + R + ', 1)');
   });
 
   isAnimating && requestAnimationFrame(animate);
+};
+
+var flickBg = function flickBg() {
+  root.className = 'root success';
+  root.setAttribute('style', 'background: rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
+  delay(150, function () {
+    root.setAttribute('style', '');
+    root.className = 'root';
+  });
+};
+
+var flickBottom = function flickBottom() {
+  bottomlight.className = 'bottomlight active';
+  bottomlight.setAttribute('style', 'box-shadow: 0 0 50vmin 25vmin rgb(' + _.random(200) + ', ' + _.random(200) + ', ' + _.random(200) + ')');
+  delay(150, function () {
+    bottomlight.setAttribute('style', '');
+    bottomlight.className = 'bottomlight';
+  });
+};
+
+var setBottomEmoji = function setBottomEmoji(reaction, username) {
+  bottomlight.querySelector('.reaction').innerHTML = ':' + reaction + ':';
+  bottomlight.querySelector('.username').innerHTML = username;
+  emojify.run(bottomlight.querySelector('.reaction'));
+};
+
+var sendEmoji = function sendEmoji(name) {
+  fetch('/likes/1', { method: 'PUT', headers: { 'content-type': 'application/json', 'x-client-id': user.id }, body: '{"emoji":"' + name.replace(/[^\w]/g, '') + '"}' }).then(function (res) {
+    if (res.status === 200 || res.status === 201) {
+      flickBg();
+    }
+  });
 };
 
 var bindInputs = function bindInputs(DOMnode, _ref4) {
@@ -256,7 +259,7 @@ var bindInputs = function bindInputs(DOMnode, _ref4) {
     cursor.x = cx;
     cursor.y = cy;
 
-    if (!isDrag && Math.abs(_dx) < .5 && Math.abs(_dy) < .5) {
+    if (!isDrag && Math.abs(_dx) < .3 && Math.abs(_dy) < .3) {
       return;
     }
 
@@ -288,6 +291,14 @@ var bindInputs = function bindInputs(DOMnode, _ref4) {
   };
 };
 
+var offset = { x: 0, y: 0 };
+var onDrag = function onDrag(rx, ry) {
+  var sensitivity = 0.05;
+  offset.x += rx * sensitivity;
+  offset.y += ry * sensitivity;
+};
+var onClick = function onClick(x, y) {};
+
 var onDragStart = function onDragStart() {
   if (root) {
     root.className = 'root dragged';
@@ -301,6 +312,46 @@ var onDragEnd = function onDragEnd() {
 
 bindInputs(app, { onClick: onClick, onDrag: onDrag, onDragStart: onDragStart, onDragEnd: onDragEnd });
 
+var websocket = function websocket(url, _ref5) {
+  var reconnect = _ref5.reconnect,
+      onOpen = _ref5.onOpen,
+      onMessage = _ref5.onMessage,
+      onClose = _ref5.onClose,
+      onError = _ref5.onError;
+
+  var ref = { ws: new WebSocket(url) };
+  var retryDelay = 1000;
+  var setupWS = function setupWS(ws) {
+    ws.onopen = function () {
+      console.log(url + ': connected');
+      onOpen && onOpen.apply(undefined, arguments);
+    };
+    ws.onclose = function () {
+      console.log(url + ': disconnected');
+      onClose && onClose.apply(undefined, arguments);
+      reconnect && recon();
+    };
+    ws.onerror = function () {
+      return onError && onError.apply(undefined, arguments);
+    };
+    ws.onmessage = function () {
+      return onMessage && onMessage.apply(undefined, arguments);
+    };
+  };
+
+  var recon = function recon() {
+    console.log('will retry in ' + retryDelay);
+    delay(retryDelay, function () {
+      ref.ws = new WebSocket(url);
+      setupWS(ref.ws);
+    });
+  };
+
+  setupWS(ref.ws);
+
+  return ref;
+};
+
 fetch('/likes/1').then(function (r) {
   return r.json();
 }).then(function (resp) {
@@ -308,9 +359,8 @@ fetch('/likes/1').then(function (r) {
 
   var proto = location.protocol;
   var wsProto = proto === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(wsProto + '://' + location.host + '/');
-
-  ws.onmessage = function (ev) {
+  var wsUrl = wsProto + '://' + location.host + '/';
+  var onMessage = function onMessage(ev) {
     var data = null;
     try {
       data = JSON.parse(ev.data);
@@ -322,6 +372,8 @@ fetch('/likes/1').then(function (r) {
     setBottomEmoji(data.emoji, data.user_name);
     flickBottom();
   };
+
+  var ws = websocket(wsUrl, { reconnect: true, onMessage: onMessage });
 });
 
 renderBubbles();
