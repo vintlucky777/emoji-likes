@@ -219,7 +219,10 @@ const animate = () => {
     }
     const x = round(pos_x * r_mult, 2);
     const y = round(pos_y * r_mult, 2);
-    b.setAttribute('style', `transform: translate3d(${x}%, ${y}%, ${10 * R}px) scale3d(${R}, ${R}, 1)`);
+
+    const style = r > 1.5 ? 'display:none' : `transform: translate3d(${x}%, ${y}%, ${10 * R}px) scale3d(${R}, ${R}, 1)`;
+
+    b.setAttribute('style', style);
   })
 
   isAnimating && requestAnimationFrame(animate);
