@@ -5,7 +5,6 @@ import WebSocket from 'ws';
 import cors from 'cors';
 import compression from 'compression';
 import bodyParser from 'body-parser';
-import uuid from 'node-uuid';
 import emoji_kw from 'emoji-keywords';
 
 import DB from './db';
