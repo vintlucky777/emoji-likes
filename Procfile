@@ -1,1 +1,1 @@
-web: npm boot-server
+web: npm install && npm run boot-server
