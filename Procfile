@@ -1,1 +1,1 @@
-web: node bin/main.js
+web: npm boot-server
